@@ -50,7 +50,7 @@ pub type GetProcAddressFn = Fn(*const libc::c_void, *const libc::c_char) -> *mut
 extern "C" {
     fn mpv_free(data: *mut libc::c_void);
     fn mpv_create() -> *mut MpvHandle;
-    fn mpv_initialize(handle: *mut MpvHandle);
+    fn mpv_initialize(handle: *mut MpvHandle) -> libc::c_int;
     fn mpv_terminate_destroy(mpv: *mut MpvHandle);
     fn mpv_set_option_string(ctx: *mut MpvHandle,
                              name: *const libc::c_char,
@@ -80,14 +80,18 @@ pub struct Mpv {
 }
 
 impl Mpv {
-    pub fn init() -> Mpv {
-        Mpv {
-            handle: unsafe {
-                let handle = mpv_create();
-                mpv_initialize(handle);
-                handle
-            },
+    pub fn init() -> Result<Mpv> {
+        let handle = unsafe{mpv_create()};
+        if handle == ptr::null_mut() {
+            return Err(Error::NOMEM);
         }
+
+        let ret = unsafe { mpv_initialize(handle) };
+        if ret < 0 {
+            return Err(Error::from_i32(ret).unwrap());
+        }
+
+        Ok(Mpv { handle: handle })
     }
 
     pub fn set_option(&self, name: &ffi::CStr, value: &ffi::CStr) {
