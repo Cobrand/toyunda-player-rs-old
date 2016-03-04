@@ -1,0 +1,10 @@
+[package]
+authors = ["yamakaky"]
+name = "toyunda-player-rs"
+version = "0.1.0"
+
+[dependencies]
+docopt = "0.6.78"
+enum_primitive = "0.1.0"
+libc = "0.2.7"
+num = "0.1.31"
