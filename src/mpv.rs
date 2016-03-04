@@ -9,6 +9,7 @@ use num::FromPrimitive;
 enum MpvHandle {}
 enum OpenglContextHandle {}
 #[repr(C)]
+#[derive(Debug)]
 pub enum SubApi {
     Opengl = 1,
     // E0083
@@ -16,6 +17,7 @@ pub enum SubApi {
 }
 enum_from_primitive! {
 #[repr(C)]
+#[derive(Debug)]
 pub enum Error {
     MPV_ERROR_SUCCESS = 0,
     MPV_ERROR_EVENT_QUEUE_FULL = -1,
