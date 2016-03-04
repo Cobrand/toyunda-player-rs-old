@@ -7,6 +7,7 @@ extern crate libc;
 extern crate enum_primitive;
 extern crate num;
 
+extern crate gl;
 extern crate sdl2;
 
 
@@ -46,6 +47,7 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
+    gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
     let window = video_subsystem.window("rust-sdl2 demo: Video", 800, 600)
         .position_centered()
         .opengl()
