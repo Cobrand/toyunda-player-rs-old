@@ -81,7 +81,7 @@ pub struct Mpv {
 
 impl Mpv {
     pub fn init() -> Result<Mpv> {
-        let handle = unsafe{mpv_create()};
+        let handle = unsafe { mpv_create() };
         if handle == ptr::null_mut() {
             return Err(Error::NOMEM);
         }
