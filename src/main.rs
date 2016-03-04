@@ -17,6 +17,7 @@ use sdl2::keyboard::Keycode;
 
 
 mod mpv;
+mod mpv_gen;
 
 const USAGE: &'static str = "
 toyunda-player.
