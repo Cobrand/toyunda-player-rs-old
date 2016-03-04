@@ -19,26 +19,26 @@ enum_from_primitive! {
 #[repr(C)]
 #[derive(Debug)]
 pub enum Error {
-    MPV_ERROR_SUCCESS = 0,
-    MPV_ERROR_EVENT_QUEUE_FULL = -1,
-    MPV_ERROR_NOMEM = -2,
-    MPV_ERROR_UNINITIALIZED = -3,
-    MPV_ERROR_INVALID_PARAMETER = -4,
-    MPV_ERROR_OPTION_NOT_FOUND = -5,
-    MPV_ERROR_OPTION_FORMAT = -6,
-    MPV_ERROR_OPTION_ERROR = -7,
-    MPV_ERROR_PROPERTY_NOT_FOUND = -8,
-    MPV_ERROR_PROPERTY_FORMAT = -9,
-    MPV_ERROR_PROPERTY_UNAVAILABLE = -10,
-    MPV_ERROR_PROPERTY_ERROR = -11,
-    MPV_ERROR_COMMAND = -12,
-    MPV_ERROR_LOADING_FAILED = -13,
-    MPV_ERROR_AO_INIT_FAILED = -14,
-    MPV_ERROR_VO_INIT_FAILED = -15,
-    MPV_ERROR_NOTHING_TO_PLAY = -16,
-    MPV_ERROR_UNKNOWN_FORMAT = -17,
-    MPV_ERROR_UNSUPPORTED = -18,
-    MPV_ERROR_NOT_IMPLEMENTED = -19,
+    SUCCESS = 0,
+    EVENT_QUEUE_FULL = -1,
+    NOMEM = -2,
+    UNINITIALIZED = -3,
+    INVALID_PARAMETER = -4,
+    OPTION_NOT_FOUND = -5,
+    OPTION_FORMAT = -6,
+    OPTION_ERROR = -7,
+    PROPERTY_NOT_FOUND = -8,
+    PROPERTY_FORMAT = -9,
+    PROPERTY_UNAVAILABLE = -10,
+    PROPERTY_ERROR = -11,
+    COMMAND = -12,
+    LOADING_FAILED = -13,
+    AO_INIT_FAILED = -14,
+    VO_INIT_FAILED = -15,
+    NOTHING_TO_PLAY = -16,
+    UNKNOWN_FORMAT = -17,
+    UNSUPPORTED = -18,
+    NOT_IMPLEMENTED = -19,
 }
 }
 pub type Result<T> = result::Result<T, Error>;
@@ -128,7 +128,7 @@ impl OpenglContext {
             mpv_opengl_cb_init_gl(ctx, ptr::null(), get_proc_address, get_proc_address_ctx)
         };
         if ret < 0 {
-            Err(Error::from_i32(ret).unwrap_or(Error::MPV_ERROR_SUCCESS))
+            Err(Error::from_i32(ret).unwrap())
         } else {
             Ok(OpenglContext { handle: ctx })
         }
