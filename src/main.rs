@@ -20,7 +20,6 @@ use sdl2_sys::video::SDL_GL_SwapWindow;
 use std::ffi::CStr;
 use std::mem;
 
-
 mod mpv;
 mod mpv_gen;
 
@@ -81,6 +80,7 @@ fn main() {
     let mpv = mpv::Mpv::init().unwrap();
     let mpv_gl = get_mpv_gl(&mpv, &video_subsystem);
     mpv.set_option("vo", "opengl-cb");
+    mpv.command(&["loadfile", args.arg_file.as_str()]).unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
 
