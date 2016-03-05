@@ -79,6 +79,7 @@ pub enum Enum_mpv_error {
 }
 }
 pub type mpv_error = Enum_mpv_error;
+enum_from_primitive! {
 #[derive(Clone, Copy)]
 #[repr(u32)]
 pub enum Enum_mpv_format {
@@ -92,6 +93,7 @@ pub enum Enum_mpv_format {
     MPV_FORMAT_NODE_ARRAY = 7,
     MPV_FORMAT_NODE_MAP = 8,
     MPV_FORMAT_BYTE_ARRAY = 9,
+}
 }
 pub type mpv_format = Enum_mpv_format;
 #[repr(C)]
@@ -171,6 +173,7 @@ impl ::std::default::Default for Struct_mpv_byte_array {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 pub type mpv_byte_array = Struct_mpv_byte_array;
+enum_from_primitive! {
 #[derive(Clone, Copy)]
 #[repr(u32)]
 pub enum Enum_mpv_event_id {
@@ -200,6 +203,7 @@ pub enum Enum_mpv_event_id {
     MPV_EVENT_CHAPTER_CHANGE = 23,
     MPV_EVENT_QUEUE_OVERFLOW = 24,
 }
+}
 pub type mpv_event_id = Enum_mpv_event_id;
 #[repr(C)]
 #[derive(Copy)]
@@ -215,6 +219,7 @@ impl ::std::default::Default for Struct_mpv_event_property {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 pub type mpv_event_property = Struct_mpv_event_property;
+enum_from_primitive! {
 #[derive(Clone, Copy)]
 #[repr(u32)]
 pub enum Enum_mpv_log_level {
@@ -226,6 +231,7 @@ pub enum Enum_mpv_log_level {
     MPV_LOG_LEVEL_V = 50,
     MPV_LOG_LEVEL_DEBUG = 60,
     MPV_LOG_LEVEL_TRACE = 70,
+}
 }
 pub type mpv_log_level = Enum_mpv_log_level;
 #[repr(C)]
@@ -243,6 +249,7 @@ impl ::std::default::Default for Struct_mpv_event_log_message {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 pub type mpv_event_log_message = Struct_mpv_event_log_message;
+enum_from_primitive! {
 #[derive(Clone, Copy)]
 #[repr(u32)]
 pub enum Enum_mpv_end_file_reason {
@@ -251,6 +258,7 @@ pub enum Enum_mpv_end_file_reason {
     MPV_END_FILE_REASON_QUIT = 3,
     MPV_END_FILE_REASON_ERROR = 4,
     MPV_END_FILE_REASON_REDIRECT = 5,
+}
 }
 pub type mpv_end_file_reason = Enum_mpv_end_file_reason;
 #[repr(C)]
