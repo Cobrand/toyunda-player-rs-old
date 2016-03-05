@@ -79,14 +79,14 @@ impl OpenglContext {
         assert!(ret >= 0);
     }
 
-    pub fn report_flip(&self, time: i64) -> Result<()> {
-        let ret = unsafe { mpv_opengl_cb_report_flip(self.handle, time) };
-        if ret < 0 {
-            Err(mpv_error::from_i32(ret).unwrap())
-        } else {
-            Ok(())
-        }
-    }
+    //pub fn report_flip(&self, time: i64) -> Result<()> {
+    //    let ret = unsafe { mpv_opengl_cb_report_flip(self.handle, time) };
+    //    if ret < 0 {
+    //        Err(mpv_error::from_i32(ret).unwrap())
+    //    } else {
+    //        Ok(())
+    //    }
+    //}
 }
 
 impl Drop for OpenglContext {
