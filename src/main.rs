@@ -81,6 +81,7 @@ fn main() {
     let mpv = mpv::Mpv::init().unwrap();
     let mpv_gl = get_mpv_gl(&mpv, &video_subsystem);
     mpv.set_option("vo", "opengl-cb");
+    mpv.command(&["loadfile", &args.arg_file as &str]).unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
 
@@ -98,11 +99,9 @@ fn main() {
             // but it's kind of useless
             // it's still necessary to empty the event pool
         }
-        mpv_gl.draw(0, 800, 600)
-        /*
+        mpv_gl.draw(0, 800, 600);
         unsafe {
-        SDL_GL_SwapWindow(window.raw());
+            SDL_GL_SwapWindow(renderer.window().unwrap().raw());
         }
-       */
     }
 }
