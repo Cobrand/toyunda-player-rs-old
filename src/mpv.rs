@@ -4,6 +4,7 @@ use std;
 use std::ffi;
 use std::ptr;
 use std::result;
+use std::mem;
 use std::option::Option;
 
 use num::FromPrimitive;
@@ -72,6 +73,42 @@ impl Mpv {
                 Enum_mpv_event_id::MPV_EVENT_NONE => None,
                 _ => Some(ret)
             }
+        }
+    }
+
+    pub fn set_property_float(&self,property:&str,value:f64) -> Result<()>{
+        let ret = unsafe {
+            let ptr : *mut std::os::raw::c_void = mem::transmute(&value) ;
+            mpv_set_property(self.handle,
+                            ffi::CString::new(property).unwrap().as_ptr(),
+                            Enum_mpv_format::MPV_FORMAT_DOUBLE,
+                            ptr)
+        } ;
+        if ret < 0 {
+            Err(mpv_error::from_i32(ret).unwrap())
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn set_property_string(&self,property:&str,value:&str) -> Result<()> {
+        let ret = unsafe {
+            mpv_set_property_string(self.handle,
+                                    ffi::CString::new(property).unwrap().as_ptr(),
+                                    ffi::CString::new(value).unwrap().as_ptr())
+        } ;
+        if ret < 0 {
+            Err(mpv_error::from_i32(ret).unwrap())
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn get_property_string(&self,property:&str) -> &str {
+        unsafe {
+            ffi::CStr::from_ptr(
+                mpv_get_property_string(self.handle,ffi::CString::new(property).unwrap().as_ptr())
+            ).to_str().unwrap()
         }
     }
 }
