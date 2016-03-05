@@ -93,7 +93,7 @@ fn main() {
                 _ => {}
             }
         }
-        while let event = mpv.wait_event() {
+        while let Some(event) = mpv.wait_event() {
             // do something with the events
             // but it's kind of useless
             // it's still necessary to empty the event pool
