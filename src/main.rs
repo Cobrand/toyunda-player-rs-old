@@ -43,17 +43,16 @@ struct CmdArgs {
     arg_file: String
 }
 
-extern "C" fn do_pote(arg: *const libc::c_void, name: *const libc::c_char) -> *const () {
+unsafe extern "C" fn do_pote(arg: *mut std::os::raw::c_void, name: *const std::os::raw::c_char) -> *mut std::os::raw::c_void {
     unsafe {
         let arg: &sdl2::VideoSubsystem = mem::transmute(arg);
         let name = CStr::from_ptr(name).to_str().unwrap();
-        println!("{}", name);
-        arg.gl_get_proc_address(name)
+        arg.gl_get_proc_address(name) as *mut std::os::raw::c_void
     }
 }
 
 fn get_mpv_gl(mpv: &mpv::Mpv, video_subsystem: &sdl2::VideoSubsystem) -> mpv::OpenglContext {
-    mpv.get_opengl_context(unsafe {mem::transmute(do_pote)}, unsafe {mem::transmute(video_subsystem)}).unwrap()
+    mpv.get_opengl_context(Some(do_pote), unsafe {mem::transmute(video_subsystem)}).unwrap()
 }
 
 fn main() {
@@ -66,10 +65,7 @@ fn main() {
     let video_subsystem = sdl_context.video().unwrap();
     video_subsystem.gl_load_library_default().unwrap();
 
-    //gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
-
-    let mpv = mpv::Mpv::init().unwrap();
-    let mpv_gl = get_mpv_gl(&mpv, &video_subsystem);
+    gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
     let window = video_subsystem.window("rust-sdl2 demo: Video", 800, 600)
         .position_centered()
@@ -82,6 +78,9 @@ fn main() {
     renderer.set_draw_color(Color::RGB(255, 0, 0));
     renderer.clear();
     renderer.present();
+
+    let mpv = mpv::Mpv::init().unwrap();
+    let mpv_gl = get_mpv_gl(&mpv, &video_subsystem);
 
     let mut event_pump = sdl_context.event_pump().unwrap();
 
