@@ -4,6 +4,7 @@ use std;
 use std::ffi;
 use std::ptr;
 use std::result;
+use std::option::Option;
 
 use num::FromPrimitive;
 
@@ -14,6 +15,8 @@ pub type Result<T> = result::Result<T, mpv_error>;
 pub struct Mpv {
     handle: *mut mpv_handle,
 }
+
+
 
 impl Mpv {
     pub fn init() -> Result<Mpv> {
@@ -59,6 +62,16 @@ impl Mpv {
             Err(mpv_error::from_i32(ret).unwrap())
         } else {
             Ok(())
+        }
+    }
+
+    pub fn wait_event(&self) -> Option<Struct_mpv_event> {
+        unsafe {
+            let ret = *mpv_wait_event(self.handle,0.0);
+            match ret.event_id {
+                Enum_mpv_event_id::MPV_EVENT_NONE => None,
+                _ => Some(ret)
+            }
         }
     }
 }

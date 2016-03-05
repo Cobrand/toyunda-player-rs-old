@@ -93,11 +93,16 @@ fn main() {
                 _ => {}
             }
         }
+        while let Some(event) = mpv.wait_event() {
+            // do something with the events
+            // but it's kind of useless
+            // it's still necessary to empty the event pool
+        }
         mpv_gl.draw(0, 800, 600)
-            /*
-               unsafe {
-               SDL_GL_SwapWindow(window.raw());
-               }
-               */
+        /*
+        unsafe {
+        SDL_GL_SwapWindow(window.raw());
+        }
+       */
     }
 }
