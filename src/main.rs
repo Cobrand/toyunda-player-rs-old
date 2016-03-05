@@ -93,11 +93,9 @@ fn main() {
                 _ => {}
             }
         }
-        mpv_gl.draw(0, 800, 600)
-            /*
-               unsafe {
-               SDL_GL_SwapWindow(window.raw());
-               }
-               */
+        mpv_gl.draw(0, 800, 600);
+        unsafe {
+            SDL_GL_SwapWindow(renderer.window().unwrap().raw());
+        }
     }
 }
