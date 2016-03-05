@@ -50,6 +50,19 @@ impl Mpv {
                             get_proc_address,
                             get_proc_address_ctx)
     }
+
+    pub fn command(&self, command: &[&str]) -> Result<()> {
+        let command_cstring: Vec<_> = command.iter().map(|item| ffi::CString::new(*item).unwrap()).collect();
+        let mut command_pointers: Vec<_> = command_cstring.iter().map(|item| item.as_ptr()).collect();
+        command_pointers.push(ptr::null());
+
+        let ret = unsafe{mpv_command(self.handle, command_pointers.as_mut_ptr())};
+        if ret < 0 {
+            Err(mpv_error::from_i32(ret).unwrap())
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl Drop for Mpv {
