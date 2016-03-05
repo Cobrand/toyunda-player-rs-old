@@ -15,6 +15,10 @@ use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
+use std::ffi::CStr;
+use std::mem;
+use std::ptr;
+
 
 mod mpv;
 mod mpv_gen;
@@ -39,6 +43,19 @@ struct CmdArgs {
     arg_file: String
 }
 
+extern "C" fn do_pote(arg: *const libc::c_void, name: *const libc::c_char) -> *const () {
+    unsafe {
+        let arg: &sdl2::VideoSubsystem = mem::transmute(arg);
+        let name = CStr::from_ptr(name).to_str().unwrap();
+        println!("{}", name);
+        arg.gl_get_proc_address(name)
+    }
+}
+
+fn get_mpv_gl(mpv: &mpv::Mpv, video_subsystem: &sdl2::VideoSubsystem) -> mpv::OpenglContext {
+    mpv.get_opengl_context(unsafe {mem::transmute(do_pote)}, unsafe {mem::transmute(video_subsystem)}).unwrap()
+}
+
 fn main() {
     let args: CmdArgs = docopt::Docopt::new(USAGE)
         .and_then(|d| d.decode())
@@ -47,8 +64,13 @@ fn main() {
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
+    video_subsystem.gl_load_library_default().unwrap();
 
-    gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
+    //gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
+
+    let mpv = mpv::Mpv::init().unwrap();
+    let mpv_gl = get_mpv_gl(&mpv, &video_subsystem);
+
     let window = video_subsystem.window("rust-sdl2 demo: Video", 800, 600)
         .position_centered()
         .opengl()

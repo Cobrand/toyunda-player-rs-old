@@ -52,7 +52,7 @@ pub type uintmax_t = ::std::os::raw::c_ulong;
 pub enum Struct_mpv_handle { }
 pub type mpv_handle = Struct_mpv_handle;
 enum_from_primitive! {
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 #[repr(i32)]
 pub enum Enum_mpv_error {
     MPV_ERROR_SUCCESS = 0,
