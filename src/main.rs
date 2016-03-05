@@ -19,7 +19,6 @@ use sdl2_sys::video::SDL_GL_SwapWindow;
 
 use std::ffi::CStr;
 use std::mem;
-use std::ptr;
 
 
 mod mpv;
@@ -46,11 +45,9 @@ struct CmdArgs {
 }
 
 unsafe extern "C" fn do_pote(arg: *mut std::os::raw::c_void, name: *const std::os::raw::c_char) -> *mut std::os::raw::c_void {
-    unsafe {
-        let arg: &sdl2::VideoSubsystem = mem::transmute(arg);
-        let name = CStr::from_ptr(name).to_str().unwrap();
-        arg.gl_get_proc_address(name) as *mut std::os::raw::c_void
-    }
+    let arg: &sdl2::VideoSubsystem = mem::transmute(arg);
+    let name = CStr::from_ptr(name).to_str().unwrap();
+    arg.gl_get_proc_address(name) as *mut std::os::raw::c_void
 }
 
 fn get_mpv_gl(mpv: &mpv::Mpv, video_subsystem: &sdl2::VideoSubsystem) -> mpv::OpenglContext {
@@ -97,10 +94,10 @@ fn main() {
             }
         }
         mpv_gl.draw(0, 800, 600)
-        /*
-        unsafe {
-            SDL_GL_SwapWindow(window.raw());
-        }
-        */
+            /*
+               unsafe {
+               SDL_GL_SwapWindow(window.raw());
+               }
+               */
     }
 }

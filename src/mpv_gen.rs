@@ -5,7 +5,6 @@
 // Changes : Enum_mpv_sub_api: add Pote variante to compile
 //           add enum_from_primitive! to MPV_ERROR
 
-use num::FromPrimitive;
 
 pub type ptrdiff_t = ::std::os::raw::c_long;
 pub type size_t = ::std::os::raw::c_ulong;

@@ -5,8 +5,6 @@ use std::ffi;
 use std::ptr;
 use std::result;
 
-use libc;
-
 use num::FromPrimitive;
 
 use mpv_gen::*;
