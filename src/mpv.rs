@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std;
 use std::ffi;
 use std::ptr;
