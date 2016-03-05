@@ -30,7 +30,9 @@ impl Mpv {
         Ok(Mpv { handle: handle })
     }
 
-    pub fn set_option(&self, name: &ffi::CStr, value: &ffi::CStr) {
+    pub fn set_option(&self, name: &str, value: &str) {
+        let name = ffi::CString::new(name).unwrap();
+        let value = ffi::CString::new(value).unwrap();
         unsafe {
             assert!(mpv_set_option_string(self.handle, name.as_ptr(), value.as_ptr()) >= 0);
         }

@@ -81,6 +81,7 @@ fn main() {
 
     let mpv = mpv::Mpv::init().unwrap();
     let mpv_gl = get_mpv_gl(&mpv, &video_subsystem);
+    mpv.set_option("vo", "opengl-cb");
 
     let mut event_pump = sdl_context.event_pump().unwrap();
 
@@ -93,6 +94,5 @@ fn main() {
                 _ => {}
             }
         }
-        // The rest of the game loop goes here...
     }
 }
