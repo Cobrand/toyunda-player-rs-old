@@ -67,6 +67,7 @@ fn main() {
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
     let window = video_subsystem.window("rust-sdl2 demo: Video", 800, 600)
+        .resizable()
         .position_centered()
         .opengl()
         .build()
@@ -99,7 +100,8 @@ fn main() {
             // but it's kind of useless
             // it's still necessary to empty the event pool
         }
-        mpv_gl.draw(0, 800, 600);
+        let (width, height) = renderer.window().unwrap().size();
+        mpv_gl.draw(0, width as i32, -(height as i32));
         unsafe {
             SDL_GL_SwapWindow(renderer.window().unwrap().raw());
         }
