@@ -34,14 +34,6 @@ impl Mpv {
         Ok(Mpv { handle: handle })
     }
 
-    pub fn set_option(&self, name: &str, value: &str) {
-        let name = ffi::CString::new(name).unwrap();
-        let value = ffi::CString::new(value).unwrap();
-        unsafe {
-            assert!(mpv_set_option_string(self.handle, name.as_ptr(), value.as_ptr()) >= 0);
-        }
-    }
-
     pub fn get_opengl_context(&self,
                               get_proc_address: mpv_opengl_cb_get_proc_address_fn,
                               get_proc_address_ctx: *mut std::os::raw::c_void)
@@ -109,6 +101,19 @@ impl Mpv {
             ffi::CStr::from_ptr(
                 mpv_get_property_string(self.handle,ffi::CString::new(property).unwrap().as_ptr())
             ).to_str().unwrap()
+        }
+    }
+
+    pub fn set_option_string(&self,property:&str,value:&str) -> Result<()> {
+        let ret = unsafe {
+            mpv_set_option_string(self.handle,
+                                    ffi::CString::new(property).unwrap().as_ptr(),
+                                    ffi::CString::new(value).unwrap().as_ptr())
+        } ;
+        if ret < 0 {
+            Err(mpv_error::from_i32(ret).unwrap())
+        } else {
+            Ok(())
         }
     }
 }

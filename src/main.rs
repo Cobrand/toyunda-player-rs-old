@@ -15,6 +15,7 @@ extern crate sdl2_sys;
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::video::FullscreenType;
 use sdl2_sys::video::SDL_GL_SwapWindow;
 
 use std::ffi::CStr;
@@ -65,7 +66,7 @@ fn main() {
 
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
-    let window = video_subsystem.window("rust-sdl2 demo: Video", 800, 600)
+    let window = video_subsystem.window("Toyunda Player", 800, 600)
         .resizable()
         .position_centered()
         .opengl()
@@ -79,7 +80,8 @@ fn main() {
 
     let mpv = mpv::Mpv::init().unwrap();
     let mpv_gl = get_mpv_gl(&mpv, &video_subsystem);
-    mpv.set_option("vo", "opengl-cb");
+    mpv.set_option_string("vo", "opengl-cb").unwrap();
+    mpv.set_option_string("sid", "no").unwrap();
     mpv.command(&["loadfile", &args.arg_file as &str]).unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
@@ -109,10 +111,11 @@ fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Kp2), .. } => {set_prop_f("speed",0.2).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::Kp1), .. } => {set_prop_f("speed",0.1).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::Kp0), .. } => {set_prop_f("speed",1.0).unwrap();},
+                //Event::KeyDown { keycode: Some(Keycode::F), .. } => {renderer.window().unwrap().set_fullscreen(FullscreenType::True);},
                 _ => {}
             }
         }
-        while let Some(event) = mpv.wait_event() {
+        while let Some(_) = mpv.wait_event() {
             // do something with the events
             // but it's kind of useless
             // it's still necessary to empty the event pool
