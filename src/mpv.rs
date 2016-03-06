@@ -15,6 +15,24 @@ pub struct Mpv {
     handle: *mut mpv_handle,
 }
 
+pub trait MpvFormat : Sized {
+    fn to_mpv_format(&self) -> (Enum_mpv_format, *mut libc::c_void);
+}
+
+impl MpvFormat for f64 {
+    fn to_mpv_format(&self) -> (Enum_mpv_format, *mut libc::c_void) {
+        let mut value = self.clone();
+        let ptr: *mut libc::c_void = &mut &self as *mut _ as *mut libc::c_void;
+        (Enum_mpv_format::MPV_FORMAT_DOUBLE, ptr)
+    }
+}
+// impl MpvFormat for &str {
+// fn toMpvFormat(&self) -> (Enum_mpv_format, *mut libc::c_void) {
+// let ptr = ffi::CString::new(self).unwrap().as_ptr();
+// (Enum_mpv_format::MPV_FORMAT_STRING, ptr as *mut libc::c_void)
+// }
+// }
+//
 impl Mpv {
     pub fn init() -> Result<Mpv> {
         let handle = unsafe { mpv_create() };
@@ -66,28 +84,27 @@ impl Mpv {
         }
     }
 
-    pub fn set_property_float(&self, property: &str, mut value: f64) -> Result<()> {
-        let ptr = &mut value as *mut _ as *mut libc::c_void;
+    pub fn set_property<T: MpvFormat>(&self, property: &str, value: T) -> Result<()> {
+        let (format, ptr) = value.to_mpv_format();
         let ret = unsafe {
             mpv_set_property(self.handle,
                              ffi::CString::new(property).unwrap().as_ptr(),
-                             Enum_mpv_format::MPV_FORMAT_DOUBLE,
+                             format,
                              ptr)
         };
 
         ret_to_result(ret, ())
     }
-
-    pub fn set_property_string(&self, property: &str, value: &str) -> Result<()> {
-        let ret = unsafe {
-            mpv_set_property_string(self.handle,
-                                    ffi::CString::new(property).unwrap().as_ptr(),
-                                    ffi::CString::new(value).unwrap().as_ptr())
-        };
-
-        ret_to_result(ret, ())
-    }
-
+    // pub fn set_property_string(&self, property: &str, value: &str) -> Result<()> {
+    // let ret = unsafe {
+    // mpv_set_property_string(self.handle,
+    // ffi::CString::new(property).unwrap().as_ptr(),
+    // ffi::CString::new(value).unwrap().as_ptr())
+    // };
+    //
+    // ret_to_result(ret, ())
+    // }
+    //
     pub fn get_property_string(&self, property: &str) -> &str {
         unsafe {
             ffi::CStr::from_ptr(mpv_get_property_string(self.handle,
