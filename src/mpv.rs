@@ -32,8 +32,9 @@ impl Mpv {
                               get_proc_address_ctx: *mut libc::c_void)
                               -> Result<OpenglContext> {
         OpenglContext::init(unsafe {
-                                mpv_get_sub_api(self.handle, Enum_mpv_sub_api::MPV_SUB_API_OPENGL_CB) as *mut mpv_opengl_cb_context
-                            },
+                                mpv_get_sub_api(self.handle,
+                                                Enum_mpv_sub_api::MPV_SUB_API_OPENGL_CB)
+                            } as *mut mpv_opengl_cb_context,
                             get_proc_address,
                             get_proc_address_ctx)
     }
