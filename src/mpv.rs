@@ -17,8 +17,6 @@ pub struct Mpv {
     handle: *mut mpv_handle,
 }
 
-
-
 impl Mpv {
     pub fn init() -> Result<Mpv> {
         let handle = unsafe { mpv_create() };
@@ -27,11 +25,8 @@ impl Mpv {
         }
 
         let ret = unsafe { mpv_initialize(handle) };
-        if ret < 0 {
-            return Err(mpv_error::from_i32(ret).unwrap());
-        }
 
-        Ok(Mpv { handle: handle })
+        ret_to_result(ret, Mpv { handle: handle })
     }
 
     pub fn get_opengl_context(&self,
@@ -51,11 +46,8 @@ impl Mpv {
         command_pointers.push(ptr::null());
 
         let ret = unsafe{mpv_command(self.handle, command_pointers.as_mut_ptr())};
-        if ret < 0 {
-            Err(mpv_error::from_i32(ret).unwrap())
-        } else {
-            Ok(())
-        }
+
+        ret_to_result(())
     }
 
     pub fn wait_event(&self) -> Option<Struct_mpv_event> {
@@ -76,11 +68,8 @@ impl Mpv {
                             Enum_mpv_format::MPV_FORMAT_DOUBLE,
                             ptr)
         } ;
-        if ret < 0 {
-            Err(mpv_error::from_i32(ret).unwrap())
-        } else {
-            Ok(())
-        }
+
+        ret_to_result(())
     }
 
     pub fn set_property_string(&self,property:&str,value:&str) -> Result<()> {
@@ -89,11 +78,8 @@ impl Mpv {
                                     ffi::CString::new(property).unwrap().as_ptr(),
                                     ffi::CString::new(value).unwrap().as_ptr())
         } ;
-        if ret < 0 {
-            Err(mpv_error::from_i32(ret).unwrap())
-        } else {
-            Ok(())
-        }
+
+        ret_to_result(())
     }
 
     pub fn get_property_string(&self,property:&str) -> &str {
@@ -110,11 +96,16 @@ impl Mpv {
                                     ffi::CString::new(property).unwrap().as_ptr(),
                                     ffi::CString::new(value).unwrap().as_ptr())
         } ;
-        if ret < 0 {
-            Err(mpv_error::from_i32(ret).unwrap())
-        } else {
-            Ok(())
-        }
+
+        ret_to_result(ret, ())
+    }
+}
+
+fn ret_to_result<T>(ret: i32, default: T) -> Error<T> {
+    if ret < 0 {
+        Err(mpv_error::from_i32(ret).unwrap())
+    } else {
+        Ok(default)
     }
 }
 
@@ -139,11 +130,8 @@ impl OpenglContext {
         let ret = unsafe {
             mpv_opengl_cb_init_gl(ctx, ptr::null(), get_proc_address, get_proc_address_ctx)
         };
-        if ret < 0 {
-            Err(mpv_error::from_i32(ret).unwrap())
-        } else {
-            Ok(OpenglContext { handle: ctx })
-        }
+
+        ret_to_result(ret, OpenglContext { handle: ctx })
     }
 
     pub fn draw(&self, fbo: i32, width: i32, heigth: i32) {
@@ -153,11 +141,7 @@ impl OpenglContext {
 
     //pub fn report_flip(&self, time: i64) -> Result<()> {
     //    let ret = unsafe { mpv_opengl_cb_report_flip(self.handle, time) };
-    //    if ret < 0 {
-    //        Err(mpv_error::from_i32(ret).unwrap())
-    //    } else {
-    //        Ok(())
-    //    }
+    //    ret_to_result(ret, ())
     //}
 }
 
