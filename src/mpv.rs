@@ -39,11 +39,15 @@ impl Mpv {
     }
 
     pub fn command(&self, command: &[&str]) -> Result<()> {
-        let command_cstring: Vec<_> = command.iter().map(|item| ffi::CString::new(*item).unwrap()).collect();
-        let mut command_pointers: Vec<_> = command_cstring.iter().map(|item| item.as_ptr()).collect();
+        let command_cstring: Vec<_> = command.iter()
+                                             .map(|item| ffi::CString::new(*item).unwrap())
+                                             .collect();
+        let mut command_pointers: Vec<_> = command_cstring.iter()
+                                                          .map(|item| item.as_ptr())
+                                                          .collect();
         command_pointers.push(ptr::null());
 
-        let ret = unsafe{mpv_command(self.handle, command_pointers.as_mut_ptr())};
+        let ret = unsafe { mpv_command(self.handle, command_pointers.as_mut_ptr()) };
 
         ret_to_result(ret, ())
     }
@@ -66,38 +70,41 @@ impl Mpv {
         let ptr = &mut value as *mut _ as *mut libc::c_void;
         let ret = unsafe {
             mpv_set_property(self.handle,
-                            ffi::CString::new(property).unwrap().as_ptr(),
-                            Enum_mpv_format::MPV_FORMAT_DOUBLE,
-                            ptr)
-        } ;
+                             ffi::CString::new(property).unwrap().as_ptr(),
+                             Enum_mpv_format::MPV_FORMAT_DOUBLE,
+                             ptr)
+        };
 
         ret_to_result(ret, ())
     }
 
-    pub fn set_property_string(&self,property:&str,value:&str) -> Result<()> {
+    pub fn set_property_string(&self, property: &str, value: &str) -> Result<()> {
         let ret = unsafe {
             mpv_set_property_string(self.handle,
                                     ffi::CString::new(property).unwrap().as_ptr(),
                                     ffi::CString::new(value).unwrap().as_ptr())
-        } ;
+        };
 
         ret_to_result(ret, ())
     }
 
-    pub fn get_property_string(&self,property:&str) -> &str {
+    pub fn get_property_string(&self, property: &str) -> &str {
         unsafe {
-            ffi::CStr::from_ptr(
-                mpv_get_property_string(self.handle,ffi::CString::new(property).unwrap().as_ptr())
-            ).to_str().unwrap()
+            ffi::CStr::from_ptr(mpv_get_property_string(self.handle,
+                                                        ffi::CString::new(property)
+                                                            .unwrap()
+                                                            .as_ptr()))
+                .to_str()
+                .unwrap()
         }
     }
 
-    pub fn set_option_string(&self,property:&str,value:&str) -> Result<()> {
+    pub fn set_option_string(&self, property: &str, value: &str) -> Result<()> {
         let ret = unsafe {
             mpv_set_option_string(self.handle,
-                                    ffi::CString::new(property).unwrap().as_ptr(),
-                                    ffi::CString::new(value).unwrap().as_ptr())
-        } ;
+                                  ffi::CString::new(property).unwrap().as_ptr(),
+                                  ffi::CString::new(value).unwrap().as_ptr())
+        };
 
         ret_to_result(ret, ())
     }
@@ -141,10 +148,10 @@ impl OpenglContext {
         assert!(ret >= 0);
     }
 
-    //pub fn report_flip(&self, time: i64) -> Result<()> {
+    // pub fn report_flip(&self, time: i64) -> Result<()> {
     //    let ret = unsafe { mpv_opengl_cb_report_flip(self.handle, time) };
     //    ret_to_result(ret, ())
-    //}
+    // }
 }
 
 impl Drop for OpenglContext {
