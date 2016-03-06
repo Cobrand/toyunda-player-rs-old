@@ -1,8 +1,6 @@
 extern crate rustc_serialize;
 extern crate docopt;
 
-extern crate libc;
-
 #[macro_use]
 extern crate enum_primitive;
 extern crate num;
@@ -17,7 +15,7 @@ use sdl2::keyboard::Keycode;
 use sdl2_sys::video::SDL_GL_SwapWindow;
 
 use std::ffi::CStr;
-use std::mem;
+use std::os::raw as libc;
 
 
 mod mpv;
@@ -43,14 +41,15 @@ struct CmdArgs {
     arg_file: String
 }
 
-unsafe extern "C" fn do_pote(arg: *mut std::os::raw::c_void, name: *const std::os::raw::c_char) -> *mut std::os::raw::c_void {
-    let arg: &sdl2::VideoSubsystem = mem::transmute(arg);
+unsafe extern "C" fn do_pote(arg: *mut libc::c_void, name: *const libc::c_char) -> *mut libc::c_void {
+    let arg: &sdl2::VideoSubsystem = &*(arg as *mut sdl2::VideoSubsystem);
     let name = CStr::from_ptr(name).to_str().unwrap();
-    arg.gl_get_proc_address(name) as *mut std::os::raw::c_void
+    arg.gl_get_proc_address(name) as *mut libc::c_void
 }
 
-fn get_mpv_gl(mpv: &mpv::Mpv, video_subsystem: &sdl2::VideoSubsystem) -> mpv::OpenglContext {
-    mpv.get_opengl_context(Some(do_pote), unsafe {mem::transmute(video_subsystem)}).unwrap()
+fn get_mpv_gl(mpv: &mpv::Mpv, video_subsystem: &mut sdl2::VideoSubsystem) -> mpv::OpenglContext {
+    let ptr = video_subsystem as *mut _ as *mut libc::c_void;
+    mpv.get_opengl_context(Some(do_pote), ptr).unwrap()
 }
 
 fn main() {
@@ -59,7 +58,7 @@ fn main() {
         .unwrap_or_else(|e| e.exit());
 
     let sdl_context = sdl2::init().unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
+    let mut video_subsystem = sdl_context.video().unwrap();
     video_subsystem.gl_load_library_default().unwrap();
 
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
@@ -77,7 +76,7 @@ fn main() {
     renderer.present();
 
     let mpv = mpv::Mpv::init().unwrap();
-    let mpv_gl = get_mpv_gl(&mpv, &video_subsystem);
+    let mpv_gl = get_mpv_gl(&mpv, &mut video_subsystem);
     mpv.set_option_string("vo", "opengl-cb").unwrap();
     mpv.set_option_string("sid", "no").unwrap();
     mpv.command(&["loadfile", &args.arg_file as &str]).unwrap();
