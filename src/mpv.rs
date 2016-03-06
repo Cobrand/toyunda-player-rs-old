@@ -15,12 +15,12 @@ pub struct Mpv {
     handle: *mut mpv_handle,
 }
 
-pub enum MpvFormat {
+pub enum MpvFormat<'a> {
     RawMpvFormat {
         format: Enum_mpv_format,
         data: *mut libc::c_void,
     },
-    Str(String),
+    Str(&'a str),
 }
 
 pub trait MpvFormatProperty : Clone {
@@ -36,11 +36,22 @@ impl MpvFormatProperty for f64 {
         }
     }
 }
-// impl MpvFormatProperty for &str {
-// fn to_mpv_format(&mut self) -> MpvFormat {
-// MpvFormat::Str(String::new(&self))
-// }
-// }
+
+impl MpvFormatProperty for bool {
+    fn to_mpv_format(&mut self) -> MpvFormat {
+        let ptr = self as *mut _ as *mut libc::c_void;
+        MpvFormat::RawMpvFormat {
+            format: Enum_mpv_format::MPV_FORMAT_FLAG,
+            data: ptr,
+        }
+    }
+}
+
+impl<'a> MpvFormatProperty for &'a str {
+    fn to_mpv_format(&mut self) -> MpvFormat {
+        MpvFormat::Str(self)
+    }
+}
 
 impl Mpv {
     pub fn init() -> Result<Mpv> {
@@ -83,7 +94,7 @@ impl Mpv {
         let event = unsafe {
             let ptr = mpv_wait_event(self.handle, 0.0);
             if ptr.is_null() {
-                return None;
+                panic!("Unexpected null ptr from mpv_wait_event");
             }
             *ptr
         };
@@ -94,7 +105,8 @@ impl Mpv {
     }
 
     pub fn set_property<T: MpvFormatProperty>(&self, property: &str, value: T) -> Result<()> {
-        let format_struct: MpvFormat = value.clone().to_mpv_format();
+        let mut value = value.clone();
+        let format_struct: MpvFormat = value.to_mpv_format();
         let ret = match format_struct {
             MpvFormat::RawMpvFormat { format, data: ptr } => unsafe {
                 mpv_set_property(self.handle,
@@ -108,19 +120,9 @@ impl Mpv {
                                         ffi::CString::new(string).unwrap().as_ptr())
             },
         };
-
         ret_to_result(ret, ())
     }
-    // pub fn set_property_string(&self, property: &str, value: &str) -> Result<()> {
-    // let ret = unsafe {
-    // mpv_set_property_string(self.handle,
-    // ffi::CString::new(property).unwrap().as_ptr(),
-    // ffi::CString::new(value).unwrap().as_ptr())
-    // };
-    //
-    // ret_to_result(ret, ())
-    // }
-    //
+
     pub fn get_property_string(&self, property: &str) -> &str {
         unsafe {
             ffi::CStr::from_ptr(mpv_get_property_string(self.handle,
@@ -132,13 +134,22 @@ impl Mpv {
         }
     }
 
-    pub fn set_option_string(&self, property: &str, value: &str) -> Result<()> {
-        let ret = unsafe {
-            mpv_set_option_string(self.handle,
-                                  ffi::CString::new(property).unwrap().as_ptr(),
-                                  ffi::CString::new(value).unwrap().as_ptr())
+    pub fn set_option<T: MpvFormatProperty>(&self, option: &str, value: T) -> Result<()> {
+        let mut value = value.clone();
+        let format_struct: MpvFormat = value.to_mpv_format();
+        let ret = match format_struct {
+            MpvFormat::RawMpvFormat { format, data: ptr } => unsafe {
+                mpv_set_option(self.handle,
+                               ffi::CString::new(option).unwrap().as_ptr(),
+                               format,
+                               ptr)
+            },
+            MpvFormat::Str(string) => unsafe {
+                mpv_set_option_string(self.handle,
+                                      ffi::CString::new(option).unwrap().as_ptr(),
+                                      ffi::CString::new(string).unwrap().as_ptr())
+            },
         };
-
         ret_to_result(ret, ())
     }
 }
