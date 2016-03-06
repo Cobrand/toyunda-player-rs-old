@@ -143,9 +143,9 @@ impl OpenglContext {
         ret_to_result(ret, OpenglContext { handle: ctx })
     }
 
-    pub fn draw(&self, fbo: i32, width: i32, heigth: i32) {
+    pub fn draw(&self, fbo: i32, width: i32, heigth: i32) -> Result<()> {
         let ret = unsafe { mpv_opengl_cb_draw(self.handle, fbo, width, heigth) };
-        assert!(ret >= 0);
+        ret_to_result(ret, ())
     }
 
     // pub fn report_flip(&self, time: i64) -> Result<()> {

@@ -119,7 +119,7 @@ fn main() {
             // it's still necessary to empty the event pool
         }
         let (width, height) = renderer.window().unwrap().size();
-        mpv_gl.draw(0, width as i32, -(height as i32));
+        mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
         unsafe {
             SDL_GL_SwapWindow(renderer.window().unwrap().raw());
         }
