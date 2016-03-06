@@ -21,6 +21,7 @@ use std::os::raw as libc;
 
 mod mpv;
 mod mpv_gen;
+mod event_dispatcher;
 
 const USAGE: &'static str = "
 toyunda-player.
