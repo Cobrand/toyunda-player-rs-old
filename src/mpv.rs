@@ -15,14 +15,13 @@ pub struct Mpv {
     handle: *mut mpv_handle,
 }
 
-pub trait MpvFormat : Sized {
-    fn to_mpv_format(&self) -> (Enum_mpv_format, *mut libc::c_void);
+pub trait MpvFormat : Clone {
+    fn to_mpv_format(&mut self) -> (Enum_mpv_format, *mut libc::c_void);
 }
 
 impl MpvFormat for f64 {
-    fn to_mpv_format(&self) -> (Enum_mpv_format, *mut libc::c_void) {
-        let mut value = self.clone();
-        let ptr: *mut libc::c_void = &mut &self as *mut _ as *mut libc::c_void;
+    fn to_mpv_format(&mut self) -> (Enum_mpv_format, *mut libc::c_void) {
+        let ptr = self as *mut _ as *mut libc::c_void;
         (Enum_mpv_format::MPV_FORMAT_DOUBLE, ptr)
     }
 }
@@ -85,7 +84,8 @@ impl Mpv {
     }
 
     pub fn set_property<T: MpvFormat>(&self, property: &str, value: T) -> Result<()> {
-        let (format, ptr) = value.to_mpv_format();
+        let mut tmp_value = value.clone();
+        let (format, ptr) = tmp_value.to_mpv_format();
         let ret = unsafe {
             mpv_set_property(self.handle,
                              ffi::CString::new(property).unwrap().as_ptr(),
