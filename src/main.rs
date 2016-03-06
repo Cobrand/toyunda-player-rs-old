@@ -92,24 +92,24 @@ fn main() {
                 Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     break 'running
                 },
-                Event::KeyDown { keycode: Some(Keycode::Space), .. } => {
+                Event::KeyDown { keycode: Some(Keycode::Space),repeat: false, .. } => {
                     match mpv.get_property_string("pause") {
                         "yes" => {set_prop_s("pause","no").unwrap();},
                         "no" => {set_prop_s("pause","yes").unwrap();},
                         _ => {panic!("unexpected answer from get_property_string");}
                     }
                 },
-                Event::KeyDown { keycode: Some(Keycode::Kp9), .. } => {set_prop_f("speed",0.9).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp8), .. } => {set_prop_f("speed",0.8).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp7), .. } => {set_prop_f("speed",0.7).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp6), .. } => {set_prop_f("speed",0.6).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp5), .. } => {set_prop_f("speed",0.5).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp4), .. } => {set_prop_f("speed",0.4).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp3), .. } => {set_prop_f("speed",0.3).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp2), .. } => {set_prop_f("speed",0.2).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp1), .. } => {set_prop_f("speed",0.1).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp0), .. } => {set_prop_f("speed",1.0).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::F), .. } => {
+                Event::KeyDown { keycode: Some(Keycode::Kp9), repeat: false, .. } => {set_prop_f("speed",0.9).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp8), repeat: false, .. } => {set_prop_f("speed",0.8).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp7), repeat: false, .. } => {set_prop_f("speed",0.7).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp6), repeat: false, .. } => {set_prop_f("speed",0.6).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp5), repeat: false, .. } => {set_prop_f("speed",0.5).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp4), repeat: false, .. } => {set_prop_f("speed",0.4).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp3), repeat: false, .. } => {set_prop_f("speed",0.3).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp2), repeat: false, .. } => {set_prop_f("speed",0.2).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp1), repeat: false, .. } => {set_prop_f("speed",0.1).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp0), repeat: false, .. } => {set_prop_f("speed",1.0).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::F), repeat: false, .. } => {
                     if (renderer.window().unwrap().window_flags() & (SDL_WindowFlags::SDL_WINDOW_FULLSCREEN as u32)) != 0 {
                         renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Off);
                     } else {
