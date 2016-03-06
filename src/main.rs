@@ -12,10 +12,8 @@ extern crate sdl2;
 extern crate sdl2_sys;
 
 
-use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::video::FullscreenType;
 use sdl2_sys::video::SDL_GL_SwapWindow;
 
 use std::ffi::CStr;
