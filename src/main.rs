@@ -22,7 +22,6 @@ use std::os::raw as libc;
 mod mpv;
 mod mpv_gen;
 
-#[rustfmt_skip]
 const USAGE: &'static str = "
 toyunda-player.
 
@@ -80,62 +79,35 @@ fn main() {
 
     let mpv = mpv::Mpv::init().unwrap();
     let mpv_gl = get_mpv_gl(&mpv, &mut video_subsystem);
-    mpv.set_option_string("vo", "opengl-cb").unwrap();
-    mpv.set_option_string("sid", "no").unwrap();
+    mpv.set_option("vo", "opengl-cb").unwrap();
+    mpv.set_option("sid", "no").unwrap();
     mpv.command(&["loadfile", &args.arg_file as &str]).unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
 
     'running: loop {
         for event in event_pump.poll_iter() {
-            let set_prop_s = |p, v| mpv.set_property_string(p, v);
-            let set_prop_f = |p, v| mpv.set_property_float(p, v);
             match event {
-                Event::Quit {..} |
-                    Event::KeyDown { keycode: Some(Keycode::Escape), .. } => break 'running,
-                    Event::KeyDown { keycode: Some(Keycode::Space),repeat: false, .. } => {
-                        match mpv.get_property_string("pause") {
-                            "yes" => {
-                                set_prop_s("pause", "no").unwrap();
-                            }
-                            "no" => {
-                                set_prop_s("pause", "yes").unwrap();
-                            }
-                            _ => {
-                                panic!("unexpected answer from get_property_string");
-                            }
-                        }
+                Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                    break 'running
+                },
+                Event::KeyDown { keycode: Some(Keycode::Space),repeat: false, .. } => {
+                    match mpv.get_property_string("pause") {
+                        "yes" => {mpv.set_property("pause","no").unwrap();},
+                        "no" => {mpv.set_property("pause","yes").unwrap();},
+                        _ => {panic!("unexpected answer from get_property_string");}
                     }
-                Event::KeyDown { keycode: Some(Keycode::Kp9), repeat: false, .. } => {
-                    set_prop_f("speed", 0.9).unwrap();
-                }
-                Event::KeyDown { keycode: Some(Keycode::Kp8), repeat: false, .. } => {
-                    set_prop_f("speed", 0.8).unwrap();
-                }
-                Event::KeyDown { keycode: Some(Keycode::Kp7), repeat: false, .. } => {
-                    set_prop_f("speed", 0.7).unwrap();
-                }
-                Event::KeyDown { keycode: Some(Keycode::Kp6), repeat: false, .. } => {
-                    set_prop_f("speed", 0.6).unwrap();
-                }
-                Event::KeyDown { keycode: Some(Keycode::Kp5), repeat: false, .. } => {
-                    set_prop_f("speed", 0.5).unwrap();
-                }
-                Event::KeyDown { keycode: Some(Keycode::Kp4), repeat: false, .. } => {
-                    set_prop_f("speed", 0.4).unwrap();
-                }
-                Event::KeyDown { keycode: Some(Keycode::Kp3), repeat: false, .. } => {
-                    set_prop_f("speed", 0.3).unwrap();
-                }
-                Event::KeyDown { keycode: Some(Keycode::Kp2), repeat: false, .. } => {
-                    set_prop_f("speed", 0.2).unwrap();
-                }
-                Event::KeyDown { keycode: Some(Keycode::Kp1), repeat: false, .. } => {
-                    set_prop_f("speed", 0.1).unwrap();
-                }
-                Event::KeyDown { keycode: Some(Keycode::Kp0), repeat: false, .. } => {
-                    set_prop_f("speed", 1.0).unwrap();
-                }
+                },
+                Event::KeyDown { keycode: Some(Keycode::Kp9), repeat: false, .. } => {mpv.set_property("speed",0.9).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp8), repeat: false, .. } => {mpv.set_property("speed",0.8).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp7), repeat: false, .. } => {mpv.set_property("speed",0.7).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp6), repeat: false, .. } => {mpv.set_property("speed",0.6).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp5), repeat: false, .. } => {mpv.set_property("speed",0.5).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp4), repeat: false, .. } => {mpv.set_property("speed",0.4).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp3), repeat: false, .. } => {mpv.set_property("speed",0.3).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp2), repeat: false, .. } => {mpv.set_property("speed",0.2).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp1), repeat: false, .. } => {mpv.set_property("speed",0.1).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp0), repeat: false, .. } => {mpv.set_property("speed",1.0).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::F), repeat: false, .. } => {
                     if (renderer.window().unwrap().window_flags() &
                         (SDL_WindowFlags::SDL_WINDOW_FULLSCREEN as u32)) != 0 {
