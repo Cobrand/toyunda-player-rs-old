@@ -6,6 +6,7 @@ use std::ptr;
 use std::result;
 use std::mem;
 use std::option::Option;
+use std::os::raw as libc;
 
 use num::FromPrimitive;
 
@@ -31,7 +32,7 @@ impl Mpv {
 
     pub fn get_opengl_context(&self,
                               get_proc_address: mpv_opengl_cb_get_proc_address_fn,
-                              get_proc_address_ctx: *mut std::os::raw::c_void)
+                              get_proc_address_ctx: *mut libc::c_void)
                               -> Result<OpenglContext> {
         OpenglContext::init(unsafe {
                                 mpv_get_sub_api(self.handle, Enum_mpv_sub_api::MPV_SUB_API_OPENGL_CB) as *mut mpv_opengl_cb_context
@@ -60,9 +61,9 @@ impl Mpv {
         }
     }
 
-    pub fn set_property_float(&self,property:&str,value:f64) -> Result<()>{
+    pub fn set_property_float(&self, property: &str, mut value: f64) -> Result<()> {
+        let ptr = &mut value as *mut _ as *mut libc::c_void;
         let ret = unsafe {
-            let ptr : *mut std::os::raw::c_void = mem::transmute(&value) ;
             mpv_set_property(self.handle,
                             ffi::CString::new(property).unwrap().as_ptr(),
                             Enum_mpv_format::MPV_FORMAT_DOUBLE,
@@ -124,7 +125,7 @@ pub struct OpenglContext {
 impl OpenglContext {
     fn init(ctx: *mut mpv_opengl_cb_context,
             get_proc_address: mpv_opengl_cb_get_proc_address_fn,
-            get_proc_address_ctx: *mut std::os::raw::c_void)
+            get_proc_address_ctx: *mut libc::c_void)
             -> Result<OpenglContext> {
         assert!(!ctx.is_null());
         let ret = unsafe {
