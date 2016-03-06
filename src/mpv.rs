@@ -1,11 +1,8 @@
 #![allow(dead_code)]
 
-use std;
 use std::ffi;
 use std::ptr;
 use std::result;
-use std::mem;
-use std::option::Option;
 use std::os::raw as libc;
 
 use num::FromPrimitive;
@@ -52,12 +49,16 @@ impl Mpv {
     }
 
     pub fn wait_event(&self) -> Option<Struct_mpv_event> {
-        unsafe {
-            let ret = *mpv_wait_event(self.handle,0.0);
-            match ret.event_id {
-                Enum_mpv_event_id::MPV_EVENT_NONE => None,
-                _ => Some(ret)
+        let event = unsafe {
+            let ptr = mpv_wait_event(self.handle, 0.0);
+            if ptr.is_null() {
+                return None;
             }
+            *ptr
+        };
+        match event.event_id {
+            Enum_mpv_event_id::MPV_EVENT_NONE => None,
+            _ => Some(event),
         }
     }
 
