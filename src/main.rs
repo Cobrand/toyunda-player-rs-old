@@ -111,10 +111,10 @@ fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Kp0), repeat: false, .. } => {set_prop_f("speed",1.0).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::F), repeat: false, .. } => {
                     if (renderer.window().unwrap().window_flags() & (SDL_WindowFlags::SDL_WINDOW_FULLSCREEN as u32)) != 0 {
-                        renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Off);
+                        renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Off)
                     } else {
-                        renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Desktop);
-                    }
+                        renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Desktop)
+                    }.unwrap();
                 },
                 _ => {}
             }
