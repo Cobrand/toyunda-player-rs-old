@@ -15,23 +15,33 @@ pub struct Mpv {
     handle: *mut mpv_handle,
 }
 
-pub trait MpvFormat : Clone {
-    fn to_mpv_format(&mut self) -> (Enum_mpv_format, *mut libc::c_void);
+pub enum MpvFormat {
+    RawMpvFormat {
+        format: Enum_mpv_format,
+        data: *mut libc::c_void,
+    },
+    Str(String),
 }
 
-impl MpvFormat for f64 {
-    fn to_mpv_format(&mut self) -> (Enum_mpv_format, *mut libc::c_void) {
+pub trait MpvFormatProperty : Clone {
+    fn to_mpv_format(&mut self) -> MpvFormat;
+}
+
+impl MpvFormatProperty for f64 {
+    fn to_mpv_format(&mut self) -> MpvFormat {
         let ptr = self as *mut _ as *mut libc::c_void;
-        (Enum_mpv_format::MPV_FORMAT_DOUBLE, ptr)
+        MpvFormat::RawMpvFormat {
+            format: Enum_mpv_format::MPV_FORMAT_DOUBLE,
+            data: ptr,
+        }
     }
 }
-// impl MpvFormat for &str {
-// fn toMpvFormat(&self) -> (Enum_mpv_format, *mut libc::c_void) {
-// let ptr = ffi::CString::new(self).unwrap().as_ptr();
-// (Enum_mpv_format::MPV_FORMAT_STRING, ptr as *mut libc::c_void)
+// impl MpvFormatProperty for &str {
+// fn to_mpv_format(&mut self) -> MpvFormat {
+// MpvFormat::Str(String::new(&self))
 // }
 // }
-//
+
 impl Mpv {
     pub fn init() -> Result<Mpv> {
         let handle = unsafe { mpv_create() };
@@ -83,14 +93,20 @@ impl Mpv {
         }
     }
 
-    pub fn set_property<T: MpvFormat>(&self, property: &str, value: T) -> Result<()> {
-        let mut tmp_value = value.clone();
-        let (format, ptr) = tmp_value.to_mpv_format();
-        let ret = unsafe {
-            mpv_set_property(self.handle,
-                             ffi::CString::new(property).unwrap().as_ptr(),
-                             format,
-                             ptr)
+    pub fn set_property<T: MpvFormatProperty>(&self, property: &str, value: T) -> Result<()> {
+        let format_struct: MpvFormat = value.clone().to_mpv_format();
+        let ret = match format_struct {
+            MpvFormat::RawMpvFormat { format, data: ptr } => unsafe {
+                mpv_set_property(self.handle,
+                                 ffi::CString::new(property).unwrap().as_ptr(),
+                                 format,
+                                 ptr)
+            },
+            MpvFormat::Str(string) => unsafe {
+                mpv_set_property_string(self.handle,
+                                        ffi::CString::new(property).unwrap().as_ptr(),
+                                        ffi::CString::new(string).unwrap().as_ptr())
+            },
         };
 
         ret_to_result(ret, ())
