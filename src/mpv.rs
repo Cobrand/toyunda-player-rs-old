@@ -48,7 +48,7 @@ impl Mpv {
 
         let ret = unsafe{mpv_command(self.handle, command_pointers.as_mut_ptr())};
 
-        ret_to_result(())
+        ret_to_result(ret, ())
     }
 
     pub fn wait_event(&self) -> Option<Struct_mpv_event> {
@@ -70,7 +70,7 @@ impl Mpv {
                             ptr)
         } ;
 
-        ret_to_result(())
+        ret_to_result(ret, ())
     }
 
     pub fn set_property_string(&self,property:&str,value:&str) -> Result<()> {
@@ -80,7 +80,7 @@ impl Mpv {
                                     ffi::CString::new(value).unwrap().as_ptr())
         } ;
 
-        ret_to_result(())
+        ret_to_result(ret, ())
     }
 
     pub fn get_property_string(&self,property:&str) -> &str {
@@ -102,7 +102,7 @@ impl Mpv {
     }
 }
 
-fn ret_to_result<T>(ret: i32, default: T) -> Error<T> {
+fn ret_to_result<T>(ret: i32, default: T) -> Result<T> {
     if ret < 0 {
         Err(mpv_error::from_i32(ret).unwrap())
     } else {
