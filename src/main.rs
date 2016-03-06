@@ -12,7 +12,8 @@ extern crate sdl2_sys;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2_sys::video::SDL_GL_SwapWindow;
+use sdl2::video::FullscreenType;
+use sdl2_sys::video::SDL_WindowFlags;
 
 use std::ffi::CStr;
 use std::os::raw as libc;
@@ -108,7 +109,13 @@ fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Kp2), .. } => {set_prop_f("speed",0.2).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::Kp1), .. } => {set_prop_f("speed",0.1).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::Kp0), .. } => {set_prop_f("speed",1.0).unwrap();},
-                //Event::KeyDown { keycode: Some(Keycode::F), .. } => {renderer.window().unwrap().set_fullscreen(FullscreenType::True);},
+                Event::KeyDown { keycode: Some(Keycode::F), .. } => {
+                    if (renderer.window().unwrap().window_flags() & (SDL_WindowFlags::SDL_WINDOW_FULLSCREEN as u32)) != 0 {
+                        renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Off);
+                    } else {
+                        renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Desktop);
+                    }
+                },
                 _ => {}
             }
         }
@@ -119,8 +126,6 @@ fn main() {
         }
         let (width, height) = renderer.window().unwrap().size();
         mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
-        unsafe {
-            SDL_GL_SwapWindow(renderer.window().unwrap().raw());
-        }
+        renderer.window().unwrap().gl_swap_window();
     }
 }
