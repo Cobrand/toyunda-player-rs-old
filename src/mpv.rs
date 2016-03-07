@@ -160,6 +160,13 @@ impl Mpv {
         };
         ret_to_result(ret, ())
     }
+
+    pub fn debug(&self) {
+        unsafe {
+            let msg = ffi::CString::new("trace").unwrap();
+            mpv_request_log_messages(self.handle, msg.as_ptr());
+        }
+    }
 }
 
 fn ret_to_result<T>(ret: i32, default: T) -> Result<T> {
