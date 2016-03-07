@@ -1,32 +1,30 @@
 use std::collections::HashMap;
-extern crate sdl2;
 
 use sdl2::event::Event;
 
 //type Event = sdl2::Event;
-type Callback<'a> = Box<(Fn(&'a mut Event,) -> Result<()> + 'static)>;
+type Callback = Box<(Fn(&mut Event) -> Result<(), String>)>;
 
-fn mk_callback<'a, F>(f: F) -> Callback<'a>
-    where F: Fn(&'a mut Event,) -> Result<()> + 'static {
-        Box::new(f) as Callback
-    }
+//fn mk_callback<F>(f: &F) -> Callback
+//    where F: Fn(&mut Event) -> Result<(), i32> {
+//        Box::new(*f) as Callback
+//    }
 
 pub struct Event_Dispatcher {
-    events: HashMap<Event,Callback>,
+    events: HashMap<Event, Callback>,
 }
 
-impl Event_Dispatcher{
-    pub fn register<'a, F>(&mut self, id: Event, fun: F)
-        where F: Fn(&'a mut Event,) -> Result<()> + 'static {
-            self.events.insert(id, mk_callback(fun));
+impl Event_Dispatcher {
+    pub fn register<F>(&mut self, id: Event, fun: Callback) {
+            self.events.insert(id, fun);
     }
-    pub fn handle(&self, evt: Event) -> Result<()>{
+    pub fn handle(&self, evt: Event) -> Result<(), String>{
         match self.events.get(evt) {
             Some(&fun) => {
                 fun(evt);
-                Ok()
+                Ok(())
             },
-            None => Err(format!("Event {} not handled", evt))
+            None => Err(format!("Event {:?} not handled", evt))
         }
     }
 }
