@@ -92,7 +92,7 @@ fn main() {
                     break 'running
                 },
                 Event::KeyDown { keycode: Some(Keycode::Space),repeat: false, .. } => {
-                    match mpv.get_property_string("pause") {
+                    match mpv.get_property_string("pause").unwrap().as_str() {
                         "yes" => {mpv.set_property("pause","no").unwrap();},
                         "no" => {mpv.set_property("pause","yes").unwrap();},
                         _ => {panic!("unexpected answer from get_property_string");}
