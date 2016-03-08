@@ -17,6 +17,7 @@ use sdl2_sys::video::SDL_WindowFlags;
 
 use std::ffi::CStr;
 use std::os::raw as libc;
+use std::ops::Deref;
 
 
 mod mpv;
@@ -92,7 +93,7 @@ fn main() {
                     break 'running
                 },
                 Event::KeyDown { keycode: Some(Keycode::Space),repeat: false, .. } => {
-                    match mpv.get_property_string("pause").unwrap().as_str() {
+                    match mpv.get_property_string("pause").unwrap().deref() {
                         "yes" => {mpv.set_property("pause","no").unwrap();},
                         "no" => {mpv.set_property("pause","yes").unwrap();},
                         _ => {panic!("unexpected answer from get_property_string");}

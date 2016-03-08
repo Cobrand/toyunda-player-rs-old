@@ -151,8 +151,9 @@ impl Mpv {
         }
 
         let ret_string = unsafe { ffi::CString::from_raw(ret) }
-                             .into_string()
-                             .unwrap();
+                             .to_str()
+                             .unwrap()
+                             .into();
         unsafe { mpv_free(ret as *mut libc::c_void) };
         Some(ret_string)
     }
