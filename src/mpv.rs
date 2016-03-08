@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
+use std::error::Error;
 use std::ffi;
+use std::fmt;
 use std::ptr;
 use std::result;
 use std::os::raw as libc;
@@ -10,6 +12,20 @@ use num::FromPrimitive;
 use mpv_gen::*;
 
 pub type Result<T> = result::Result<T, mpv_error>;
+
+impl Error for Enum_mpv_error {
+    fn description(&self) -> &str {
+        let str_ptr = unsafe {mpv_error_string(*self as libc::c_int)};
+        assert!(!str_ptr.is_null());
+        unsafe { ffi::CStr::from_ptr(str_ptr).to_str().unwrap() }
+    }
+}
+
+impl fmt::Display for Enum_mpv_error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} ({:?})", self.description(), self)
+    }
+}
 
 pub struct Mpv {
     handle: *mut mpv_handle,
