@@ -105,8 +105,7 @@ impl Mpv {
         }
     }
 
-    pub fn set_property<T: MpvFormatProperty>(&self, property: &str, value: T) -> Result<()> {
-        let mut value = value.clone();
+    pub fn set_property<T: MpvFormatProperty>(&self, property: &str, mut value: T) -> Result<()> {
         let format_struct: MpvFormat = value.to_mpv_format();
         let ret = match format_struct {
             MpvFormat::RawMpvFormat { format, data: ptr } => unsafe {
@@ -142,8 +141,7 @@ impl Mpv {
         Some(ret_string)
     }
 
-    pub fn set_option<T: MpvFormatProperty>(&self, option: &str, value: T) -> Result<()> {
-        let mut value = value.clone();
+    pub fn set_option<T: MpvFormatProperty>(&self, option: &str, mut value: T) -> Result<()> {
         let format_struct: MpvFormat = value.to_mpv_format();
         let ret = match format_struct {
             MpvFormat::RawMpvFormat { format, data: ptr } => unsafe {
