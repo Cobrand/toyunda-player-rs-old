@@ -22,6 +22,7 @@ use std::ops::Deref;
 
 mod mpv;
 mod mpv_gen;
+mod parser;
 
 const USAGE: &'static str = "
 toyunda-player.

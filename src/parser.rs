@@ -1,5 +1,8 @@
 
-mod Subtitle {
+
+mod subtitle {
+    use std::collections::BTreeMap;
+    use std::collections::btree_map;
 
     #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Default)]
     pub struct Position {
@@ -14,22 +17,33 @@ mod Subtitle {
         b: i8,
     }
 
-    #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Default)]
+    #[derive(Clone, Debug, PartialEq, Eq, Hash, Default)]
     pub struct Syllable {
         color: Color,
         pos: Position,
         word: String,
     }
 
-    #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Default)]
-    pub struct Sentence {
-        syllables: Vec<Syllable>,
+    type FrameNb = u64;
+
+    #[derive(Clone)]
+    pub struct Sentence<'a> {
+        last_colored: btree_map::Iter<'a, FrameNb, Syllable>,
+        // key -> first frame of color transition
+        syllables: BTreeMap<FrameNb, Syllable>,
     }
 
-    type frame_nb = i64;
-
-    #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Default)]
-    pub struct Sub {
-        sentences: HashMap<frame_nb, Sentence>,
+    #[derive(Clone)]
+    pub struct Sub<'a> {
+        current_frame: btree_map::Iter<'a, FrameNb, Sentence<'a>>,
+        // key -> first frame when the sentence appear
+        sentences: BTreeMap<FrameNb, Sentence<'a>>,
     }
+
+    // impl Sub {
+    // pub fn new<'a>() -> Sub<'a>{
+    // let mut tmp = Sub {};
+    // tmp.current_frame = tmp.sentences.iter();
+    // }
+    // }
 }
