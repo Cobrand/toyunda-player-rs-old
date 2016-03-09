@@ -35,15 +35,19 @@ mod subtitle {
 
     #[derive(Clone)]
     pub struct Sub<'a> {
-        current_frame: btree_map::Iter<'a, FrameNb, Sentence<'a>>,
+        current_frame: Option<btree_map::Iter<'a, FrameNb, Sentence<'a>>>,
         // key -> first frame when the sentence appear
         sentences: BTreeMap<FrameNb, Sentence<'a>>,
     }
 
-    // impl Sub {
-    // pub fn new<'a>() -> Sub<'a>{
-    // let mut tmp = Sub {};
-    // tmp.current_frame = tmp.sentences.iter();
-    // }
-    // }
+    impl<'a> Sub<'a> {
+        pub fn new<'b>() -> Sub<'b> {
+            let mut tmp = Sub {
+                current_frame: None,
+                sentences: BTreeMap::new(),
+            };
+            tmp.current_frame = Some(tmp.sentences.iter());
+            tmp
+        }
+    }
 }
