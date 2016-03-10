@@ -42,12 +42,18 @@ mod subtitle {
 
     impl<'a> Sub<'a> {
         pub fn new<'b>() -> Sub<'b> {
-            let mut tmp = Sub {
+            Sub {
                 current_frame: None,
                 sentences: BTreeMap::new(),
-            };
-            tmp.current_frame = Some(tmp.sentences.iter());
-            tmp
+            }
+        }
+        fn init_iter(&'a mut self) {
+            match self.current_frame {
+                None => {
+                    self.current_frame = Some(self.sentences.iter());
+                }
+                _ => {}
+            }
         }
     }
 }
