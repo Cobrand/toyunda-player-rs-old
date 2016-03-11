@@ -74,7 +74,7 @@ fn main() {
         .unwrap();
 
     let mut renderer = window.renderer().build().unwrap();
-
+    let gl_context = renderer.window().unwrap().gl_create_context();
     renderer.clear();
     renderer.present();
 
