@@ -9,6 +9,10 @@ extern crate gl;
 extern crate sdl2;
 extern crate sdl2_sys;
 
+#[macro_use]
+extern crate log;
+extern crate env_logger;
+
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -56,6 +60,8 @@ fn get_mpv_gl(mpv: &mpv::Mpv, video_subsystem: &mut sdl2::VideoSubsystem) -> mpv
 }
 
 fn main() {
+    env_logger::init().unwrap();
+
     let args: CmdArgs = docopt::Docopt::new(USAGE)
         .and_then(|d| d.decode())
         .unwrap_or_else(|e| e.exit());
