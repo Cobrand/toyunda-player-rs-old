@@ -1,8 +1,7 @@
 
 
 mod subtitle {
-    use std::collections::BTreeMap;
-    use std::collections::btree_map;
+    use std::vec::Vec;
 
     #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Default)]
     pub struct Position {
@@ -24,35 +23,37 @@ mod subtitle {
         word: String,
     }
 
-    type FrameNb = u64;
+    type FrameNb = usize;
 
-    #[derive(Clone)]
-    pub struct Sentence<'a> {
-        last_colored: btree_map::Iter<'a, FrameNb, Syllable>,
+    #[derive(Clone, Debug, PartialEq, Eq, Hash, Default)]
+    struct Pair<T> {
+        pub frame: FrameNb,
+        pub value: T,
+    }
+
+    #[derive(Clone, Debug, PartialEq, Eq, Hash, Default)]
+    pub struct Sentence {
+        last_colored: usize,
         // key -> first frame of color transition
-        syllables: BTreeMap<FrameNb, Syllable>,
+        pub syllables: Vec<Pair<Syllable>>,
     }
 
-    #[derive(Clone)]
-    pub struct Sub<'a> {
-        current_frame: Option<btree_map::Iter<'a, FrameNb, Sentence<'a>>>,
+    #[derive(Clone, Debug, PartialEq, Eq, Hash, Default)]
+    pub struct Sub {
+        current_frame: usize,
         // key -> first frame when the sentence appear
-        sentences: BTreeMap<FrameNb, Sentence<'a>>,
+        pub sentences: Vec<Pair<Sentence>>,
     }
 
-    impl<'a> Sub<'a> {
-        pub fn new<'b>() -> Sub<'b> {
-            Sub {
-                current_frame: None,
-                sentences: BTreeMap::new(),
-            }
-        }
-        fn init_iter(&'a mut self) {
-            match self.current_frame {
-                None => {
-                    self.current_frame = Some(self.sentences.iter());
-                }
-                _ => {}
+    impl Sub {
+        pub fn advance(&mut self, frame_nb: usize) -> &Pair<Sentence> {
+            let mut current = &self.sentences[self.current_frame];
+            if frame_nb >= current.frame {
+                //current.value.advance(frame_nb);
+                current
+            } else {
+                self.current_frame += 1;
+                &self.sentences[self.current_frame]
             }
         }
     }
