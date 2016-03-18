@@ -139,23 +139,23 @@ impl Mpv {
         ret_to_result(ret, ())
     }
 
-    pub fn get_property_string(&self, property: &str) -> Option<String> {
-        let ret = unsafe {
-            mpv_get_property_string(self.handle,
-                                    ffi::CString::new(property)
-                                        .unwrap()
-                                        .as_ptr())
-        };
-        if ret.is_null() {
-            return None;
+    pub fn get_property_string(&self, property: &str) -> &str {
+        unsafe {
+            let ret = mpv_get_property_string(self.handle,
+                                              ffi::CString::new(property)
+                                                  .unwrap()
+                                                  .as_ptr());
+            if (!ret.is_null()) {
+                let ret_str = ffi::CStr::from_ptr(ret)
+                                  .to_str()
+                                  .unwrap();
+                mpv_free(ret as *mut libc::c_void);
+                Some(ret_str)
+            } else {
+                None
+            }
+            .unwrap()
         }
-
-        let ret_string = unsafe { ffi::CString::from_raw(ret) }
-                             .to_str()
-                             .unwrap()
-                             .into();
-        unsafe { mpv_free(ret as *mut libc::c_void) };
-        Some(ret_string)
     }
 
     pub fn set_option<T: MpvFormatProperty>(&self, option: &str, mut value: T) -> Result<()> {
