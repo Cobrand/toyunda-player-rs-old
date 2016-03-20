@@ -47,8 +47,29 @@ impl FontList {
         }
     }
 
-    fn get_closest_font_set(&self){
-
+    fn get_closest_font_set(&self,font_size:u32) -> Result<&FontSet,()>{
+        match self.fonts.len() {
+            0 => Err(()),
+            1 => Ok(self.fonts.first().unwrap()),
+            _ => {
+                let search_result = self.fonts.binary_search_by(|fontset| fontset.font_size.cmp(&font_size));
+                match search_result {
+                    Ok(index) => Ok(&self.fonts[index]),
+                    Err(0) => Ok(&self.fonts[0]),
+                    Err(index) =>   if (index == self.fonts.len()) {
+                                        Ok(&self.fonts.last().unwrap())
+                                    } else {
+                                        let font_set_min = &self.fonts[index - 1] ;
+                                        let font_set_max = &self.fonts[index] ;
+                                        if ( font_set_max.font_size - font_size > font_size - font_set_min.font_size ){
+                                            Ok(font_set_min)
+                                        } else {
+                                            Ok(font_set_max)
+                                        }
+                                    }
+                }
+            }
+        }
     }
 }
 
