@@ -77,7 +77,7 @@ fn main() {
 
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
-    let window = video_subsystem.window("Toyunda Player", 800, 600)
+    let window = video_subsystem.window("Toyunda Player", 960, 540)
         .resizable()
         .position_centered()
         .opengl()
@@ -87,13 +87,18 @@ fn main() {
     let mut renderer = window.renderer().build().unwrap();
     let _ = renderer.window().unwrap().gl_create_context();
 
-    let font = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
-    let mut font_outline = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
+    let font = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DroidSansMono.ttf"), 72).unwrap();
+    let mut font_outline = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DroidSansMono.ttf"), 72).unwrap();
     font_outline.set_outline_width(2);
-    let surface = font.render("test trop kek")
-        .solid(Color::RGBA(255, 0, 0, 128)).unwrap();
+    let surface = font.render("test tr€é ~@ あなた 猫 kek")
+        .blended(Color::RGBA(255, 0, 0, 128)).unwrap();
+    println!("★");
+    let surface_outline = font_outline.render("test tr€é ~@ あなた 猫 kek")
+        .blended(Color::RGBA(0, 0, 0, 128)).unwrap();
     let mut texture = renderer.create_texture_from_surface(&surface).unwrap();
+    let mut texture_outline = renderer.create_texture_from_surface(&surface_outline).unwrap();
     let TextureQuery { width:texture_width, height:texture_height, .. } = texture.query();
+    let TextureQuery { width:texture_outline_width, height:texture_outline_height, .. } = texture_outline.query();
     renderer.clear();
     renderer.present();
 
@@ -147,6 +152,7 @@ fn main() {
         }
         let (width, height) = renderer.window().unwrap().size();
         mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
+        renderer.copy(&mut texture_outline, None, Some(Rect::new(3,3,texture_outline_width,texture_outline_height)));
         renderer.copy(&mut texture, None, Some(Rect::new(5,5,texture_width,texture_height)));
         renderer.window().unwrap().gl_swap_window();
     }
