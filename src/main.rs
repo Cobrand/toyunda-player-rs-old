@@ -8,6 +8,7 @@ extern crate num;
 extern crate gl;
 extern crate sdl2;
 extern crate sdl2_sys;
+extern crate sdl2_ttf;
 
 #[macro_use]
 extern crate log;
@@ -18,6 +19,9 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::video::FullscreenType;
 use sdl2_sys::video::SDL_WindowFlags;
+use sdl2::rect::Rect;
+use sdl2::render::TextureQuery;
+use sdl2::pixels::Color;
 
 use std::ffi::CStr;
 use std::os::raw as libc;
@@ -67,6 +71,7 @@ fn main() {
         .unwrap_or_else(|e| e.exit());
 
     let sdl_context = sdl2::init().unwrap();
+    let ttf_context = sdl2_ttf::init().unwrap();
     let mut video_subsystem = sdl_context.video().unwrap();
     video_subsystem.gl_load_library_default().unwrap();
 
@@ -81,6 +86,14 @@ fn main() {
 
     let mut renderer = window.renderer().build().unwrap();
     let _ = renderer.window().unwrap().gl_create_context();
+
+    let font = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
+    let mut font_outline = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
+    font_outline.set_outline_width(2);
+    let surface = font.render("test trop kek")
+        .solid(Color::RGBA(255, 0, 0, 128)).unwrap();
+    let mut texture = renderer.create_texture_from_surface(&surface).unwrap();
+    let TextureQuery { width:texture_width, height:texture_height, .. } = texture.query();
     renderer.clear();
     renderer.present();
 
@@ -134,6 +147,7 @@ fn main() {
         }
         let (width, height) = renderer.window().unwrap().size();
         mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
+        renderer.copy(&mut texture, None, Some(Rect::new(5,5,texture_width,texture_height)));
         renderer.window().unwrap().gl_swap_window();
     }
 }
