@@ -27,6 +27,8 @@ use std::ffi::CStr;
 use std::os::raw as libc;
 use std::ops::Deref;
 
+mod displayer ;
+
 
 mod mpv;
 mod mpv_gen;
@@ -87,18 +89,9 @@ fn main() {
     let mut renderer = window.renderer().build().unwrap();
     let _ = renderer.window().unwrap().gl_create_context();
 
-    let font = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DroidSansMono.ttf"), 72).unwrap();
-    let mut font_outline = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DroidSansMono.ttf"), 72).unwrap();
+    let font = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
+    let mut font_outline = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
     font_outline.set_outline_width(2);
-    let surface = font.render("test tr€é ~@ あなた 猫 kek")
-        .blended(Color::RGBA(255, 0, 0, 128)).unwrap();
-    println!("★");
-    let surface_outline = font_outline.render("test tr€é ~@ あなた 猫 kek")
-        .blended(Color::RGBA(0, 0, 0, 128)).unwrap();
-    let mut texture = renderer.create_texture_from_surface(&surface).unwrap();
-    let mut texture_outline = renderer.create_texture_from_surface(&surface_outline).unwrap();
-    let TextureQuery { width:texture_width, height:texture_height, .. } = texture.query();
-    let TextureQuery { width:texture_outline_width, height:texture_outline_height, .. } = texture_outline.query();
     renderer.clear();
     renderer.present();
 
@@ -150,6 +143,15 @@ fn main() {
             // but it's kind of useless
             // it's still necessary to empty the event pool
         }
+        let surface = font.render("1234äoS;HEAd()★?#!{}%ù@")
+            .blended(Color::RGBA(180, 180, 180, 128)).unwrap();
+        let surface_outline = font_outline.render("1234äoS;HEAd()★?#!{}%ù@")
+            .blended(Color::RGBA(0, 0, 0, 128)).unwrap();
+        let mut texture = renderer.create_texture_from_surface(&surface).unwrap();
+        let mut texture_outline = renderer.create_texture_from_surface(&surface_outline).unwrap();
+        let TextureQuery { width:texture_width, height:texture_height, .. } = texture.query();
+        let TextureQuery { width:texture_outline_width, height:texture_outline_height, .. } = texture_outline.query();
+
         let (width, height) = renderer.window().unwrap().size();
         mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
         renderer.copy(&mut texture_outline, None, Some(Rect::new(3,3,texture_outline_width,texture_outline_height)));
