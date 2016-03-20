@@ -1,6 +1,7 @@
 extern crate sdl2_ttf;
 use std::vec::Vec;
 use std::cmp::Ordering;
+use std::path::Path;
 
 struct FontSet {
     font_size:u32,
@@ -35,8 +36,12 @@ struct FontList {
 }
 
 impl FontList {
-    fn get_font_set(&self, index: usize) -> Option<FontSet> {
-        None
+    fn new(font_path : &Path, ttf_context : &sdl2_ttf::Sdl2TtfContext  ){
+        ttf_context.load_font(font_path,72);
+    }
+
+    fn get_font_set(&self, index: usize) -> Option<&FontSet> {
+        self.fonts.get(index)
     }
 
     fn add_font_set(&mut self,font_set : FontSet) -> Result<(),&FontSet>{
