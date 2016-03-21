@@ -89,11 +89,16 @@ fn main() {
     let mut renderer = window.renderer().build().unwrap();
     let _ = renderer.window().unwrap().gl_create_context();
 
-    let font = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
+    /*let font = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
     let mut font_outline = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
-    font_outline.set_outline_width(2);
+    font_outline.set_outline_width(2);*/
     renderer.clear();
     renderer.present();
+
+    let fontlist = displayer::FontList::new(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"),&ttf_context).unwrap();
+    let font_set = fontlist.get_closest_font_set(73).unwrap();
+    let font = font_set.get_regular_font();
+    let font_outline = font_set.get_outline_font();
 
     let mpv = mpv::Mpv::init().unwrap();
     let mpv_gl = get_mpv_gl(&mpv, &mut video_subsystem);
