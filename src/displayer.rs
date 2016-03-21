@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 use std::path::Path;
 
 struct FontSet {
-    font_size:u32,
+    font_size:u16,
     font_regular:sdl2_ttf::Font,
     font_bold:sdl2_ttf::Font,
 }
@@ -36,8 +36,31 @@ struct FontList {
 }
 
 impl FontList {
-    fn new(font_path : &Path, ttf_context : &sdl2_ttf::Sdl2TtfContext  ){
-        ttf_context.load_font(font_path,72);
+    fn new(font_path : &Path, ttf_context : &sdl2_ttf::Sdl2TtfContext) -> Result<FontList,()> {
+        let mut result = FontList {fonts:Vec::<FontSet>::new()} ;
+        let mut font_size = 4 ;
+        let font_size_max = 128 ;
+        let font_size_increment = 4 ;
+        let mut error : bool = false ;
+        'fontlist: while (font_size < font_size_max ){
+            let mut font_bold ;
+            match ttf_context.load_font(font_path,font_size) {
+                Ok(font_set) => {font_bold = font_set;},
+                Err(_) => {error = true; break 'fontlist;}
+            }
+            font_bold.set_outline_width(2);
+            result.fonts.push(FontSet{
+                font_size:font_size,
+                font_regular:ttf_context.load_font(font_path,font_size).unwrap(),
+                font_bold:font_bold,
+            });
+            font_size += font_size_increment ;
+        }
+        if error {
+            Err(())
+        } else {
+            Ok(result)
+        }
     }
 
     fn get_font_set(&self, index: usize) -> Option<&FontSet> {
@@ -52,7 +75,7 @@ impl FontList {
         }
     }
 
-    fn get_closest_font_set(&self,font_size:u32) -> Result<&FontSet,()>{
+    fn get_closest_font_set(&self,font_size:u16) -> Result<&FontSet,()>{
         match self.fonts.len() {
             0 => Err(()),
             1 => Ok(self.fonts.first().unwrap()),
