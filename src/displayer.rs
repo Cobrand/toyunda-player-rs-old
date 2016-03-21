@@ -96,9 +96,8 @@ impl FontList {
                 match search_result {
                     Ok(index) => Ok(&self.fonts[index]),
                     Err(0) => Ok(&self.fonts[0]),
-                    Err(index) =>   if (index == self.fonts.len()) {
-                                        Ok(&self.fonts.last().unwrap())
-                                    } else {
+                    Err(index) if index == self.fonts.len() => Ok(&self.fonts.last().unwrap()),
+                    Err(index) =>  {
                                         let font_set_min = &self.fonts[index - 1] ;
                                         let font_set_max = &self.fonts[index] ;
                                         if ( font_set_max.font_size - font_size > font_size - font_set_min.font_size ){
