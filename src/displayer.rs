@@ -2,6 +2,7 @@ extern crate sdl2_ttf;
 use std::vec::Vec;
 use std::cmp::Ordering;
 use std::path::Path;
+use std::ops::Index;
 
 pub struct FontSet {
     font_size:u16,
@@ -26,6 +27,13 @@ impl PartialOrd for FontSet {
 impl Ord for FontSet {
     fn cmp(&self, other : &Self) -> Ordering {
         self.font_size.cmp(&other.font_size)
+    }
+}
+
+impl Index<usize> for FontList {
+    type Output = FontSet;
+    fn index(&self, index: usize) -> &FontSet {
+        &self.get_font_set(index).unwrap()
     }
 }
 
