@@ -73,7 +73,7 @@ fn main() {
         .unwrap_or_else(|e| e.exit());
 
     let sdl_context = sdl2::init().unwrap();
-    let ttf_context = sdl2_ttf::init().unwrap();
+
     let mut video_subsystem = sdl_context.video().unwrap();
     video_subsystem.gl_load_library_default().unwrap();
 

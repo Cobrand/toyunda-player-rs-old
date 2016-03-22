@@ -1,4 +1,6 @@
+extern crate sdl2;
 extern crate sdl2_ttf;
+use sdl2::render::Renderer ;
 use std::vec::Vec;
 use std::cmp::Ordering;
 use std::path::Path;
@@ -120,6 +122,21 @@ impl FontList {
     }
 }
 
-pub struct Displayer {
-    fonts            : FontList,
+pub struct Displayer<'a> {
+    fonts : FontList,
+    renderer : Renderer<'a>,
+    ttf_context : sdl2_ttf::Sdl2TtfContext
+}
+
+impl<'a> Displayer<'a> {
+    pub fn new(renderer: Renderer<'a>) -> Result<Displayer<'a>,()> {
+        let ttf_context = sdl2_ttf::init().unwrap();
+        let font_list = FontList::new(Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"),&ttf_context).unwrap() ;
+        let displayer = Displayer{
+            fonts:font_list,
+            ttf_context:ttf_context,
+            renderer:renderer
+        };
+        Ok(displayer)
+    }
 }
