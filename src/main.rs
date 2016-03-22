@@ -100,7 +100,7 @@ fn main() {
     mpv.command(&["loadfile", &args.arg_file as &str]).unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
-
+    let (mut x,mut y) = (5,5);
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -142,10 +142,12 @@ fn main() {
             // it's still necessary to empty the event pool
         }
 
-        //let (width, height) = renderer.window().unwrap().size();
-        let (width,height) = (1280,720) ;
+        let (width, height) = displayer.sdl_renderer().window().unwrap().size();
+        //let (width,height) = (960,540) ;
         mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
-        displayer.display("€€€kek");
+        x = x + 1;
+        y = y + 1; 
+        displayer.display("€€€kek",(x,y));
         displayer.sdl_renderer_mut().window().unwrap().gl_swap_window();
     }
 }

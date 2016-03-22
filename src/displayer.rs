@@ -1,6 +1,6 @@
 extern crate sdl2;
 extern crate sdl2_ttf;
-use sdl2::render::{Renderer,TextureQuery} ;
+use sdl2::render::{Renderer, TextureQuery};
 use sdl2::rect::Rect;
 use sdl2::pixels::Color;
 use std::vec::Vec;
@@ -9,27 +9,27 @@ use std::path::Path;
 use std::ops::Index;
 
 pub struct FontSet {
-    font_size:u16,
-    font_regular:sdl2_ttf::Font,
-    font_bold:sdl2_ttf::Font,
+    font_size: u16,
+    font_regular: sdl2_ttf::Font,
+    font_bold: sdl2_ttf::Font,
 }
 
 impl Eq for FontSet {}
 
 impl PartialEq for FontSet {
-    fn eq(&self, other : &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         self.font_size.eq(&other.font_size)
     }
 }
 
 impl PartialOrd for FontSet {
-    fn partial_cmp(&self, other : &Self) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.font_size.partial_cmp(&other.font_size)
     }
 }
 
 impl Ord for FontSet {
-    fn cmp(&self, other : &Self) -> Ordering {
+    fn cmp(&self, other: &Self) -> Ordering {
         self.font_size.cmp(&other.font_size)
     }
 }
@@ -56,29 +56,34 @@ impl FontSet {
 // MADE PUBLIC FOR TESTS, MAKE PRIVATE WHEN NOT NECESSARY ANYMORE
 pub struct FontList {
     // font list is a SORTED font list
-    fonts:Vec<FontSet>
+    fonts: Vec<FontSet>,
 }
 
 impl FontList {
-    pub fn new(font_path : &Path, ttf_context : &sdl2_ttf::Sdl2TtfContext) -> Result<FontList,()> {
-        let mut result = FontList {fonts:Vec::<FontSet>::new()} ;
-        let mut font_size = 4 ;
-        let font_size_max = 128 ;
-        let font_size_increment = 4 ;
-        let mut error : bool = false ;
-        'fontlist: while (font_size < font_size_max ){
-            let mut font_bold ;
-            match ttf_context.load_font(font_path,font_size) {
-                Ok(font_set) => {font_bold = font_set;},
-                Err(_) => {error = true; break 'fontlist;}
+    pub fn new(font_path: &Path, ttf_context: &sdl2_ttf::Sdl2TtfContext) -> Result<FontList, ()> {
+        let mut result = FontList { fonts: Vec::<FontSet>::new() };
+        let mut font_size = 4;
+        let font_size_max = 128;
+        let font_size_increment = 4;
+        let mut error: bool = false;
+        'fontlist: while (font_size < font_size_max) {
+            let mut font_bold;
+            match ttf_context.load_font(font_path, font_size) {
+                Ok(font_set) => {
+                    font_bold = font_set;
+                }
+                Err(_) => {
+                    error = true;
+                    break 'fontlist;
+                }
             }
             font_bold.set_outline_width(2);
-            result.fonts.push(FontSet{
-                font_size:font_size,
-                font_regular:ttf_context.load_font(font_path,font_size).unwrap(),
-                font_bold:font_bold,
+            result.fonts.push(FontSet {
+                font_size: font_size,
+                font_regular: ttf_context.load_font(font_path, font_size).unwrap(),
+                font_bold: font_bold,
             });
-            font_size += font_size_increment ;
+            font_size += font_size_increment;
         }
         if error {
             Err(())
@@ -91,33 +96,40 @@ impl FontList {
         self.fonts.get(index)
     }
 
-    pub fn add_font_set(&mut self,font_set : FontSet) -> Result<(),&FontSet>{
-        let result = self.fonts.binary_search_by(|fontset| fontset.font_size.cmp(&font_set.font_size));
+    pub fn add_font_set(&mut self, font_set: FontSet) -> Result<(), &FontSet> {
+        let result = self.fonts
+                         .binary_search_by(|fontset| fontset.font_size.cmp(&font_set.font_size));
         match result {
             Ok(index) => Err(self.fonts.get(index).unwrap()),
-            Err(index) => {self.fonts.insert(index, font_set);Ok(())}
+            Err(index) => {
+                self.fonts.insert(index, font_set);
+                Ok(())
+            }
         }
     }
 
-    pub fn get_closest_font_set(&self,font_size:u16) -> Result<&FontSet,()>{
+    pub fn get_closest_font_set(&self, font_size: u16) -> Result<&FontSet, ()> {
         match self.fonts.len() {
             0 => Err(()),
             1 => Ok(self.fonts.first().unwrap()),
             _ => {
-                let search_result = self.fonts.binary_search_by(|fontset| fontset.font_size.cmp(&font_size));
+                let search_result = self.fonts.binary_search_by(|fontset| {
+                    fontset.font_size.cmp(&font_size)
+                });
                 match search_result {
                     Ok(index) => Ok(&self.fonts[index]),
                     Err(0) => Ok(&self.fonts[0]),
                     Err(index) if index == self.fonts.len() => Ok(&self.fonts.last().unwrap()),
-                    Err(index) =>  {
-                                        let font_set_min = &self.fonts[index - 1] ;
-                                        let font_set_max = &self.fonts[index] ;
-                                        if ( font_set_max.font_size - font_size > font_size - font_set_min.font_size ){
-                                            Ok(font_set_min)
-                                        } else {
-                                            Ok(font_set_max)
-                                        }
-                                    }
+                    Err(index) => {
+                        let font_set_min = &self.fonts[index - 1];
+                        let font_set_max = &self.fonts[index];
+                        if (font_set_max.font_size - font_size >
+                            font_size - font_set_min.font_size) {
+                            Ok(font_set_min)
+                        } else {
+                            Ok(font_set_max)
+                        }
+                    }
                 }
             }
         }
@@ -125,45 +137,56 @@ impl FontList {
 }
 
 pub struct Displayer<'a> {
-    fonts : FontList,
-    renderer : Renderer<'a>,
-    ttf_context : sdl2_ttf::Sdl2TtfContext
+    fonts: FontList,
+    renderer: Renderer<'a>,
+    ttf_context: sdl2_ttf::Sdl2TtfContext,
 }
 
 impl<'a> Displayer<'a> {
-    pub fn new(renderer: Renderer<'a>) -> Result<Displayer<'a>,()> {
+    pub fn new(renderer: Renderer<'a>) -> Result<Displayer<'a>, ()> {
         let ttf_context = sdl2_ttf::init().unwrap();
-        let font_list = FontList::new(Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"),&ttf_context).unwrap() ;
-        let displayer = Displayer{
-            fonts:font_list,
-            ttf_context:ttf_context,
-            renderer:renderer
+        let font_list = FontList::new(Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"),
+                                      &ttf_context)
+                            .unwrap();
+        let displayer = Displayer {
+            fonts: font_list,
+            ttf_context: ttf_context,
+            renderer: renderer,
         };
         Ok(displayer)
     }
 
-    pub fn display(&mut self,text:&str){
-        //self.renderer
+    pub fn display(&mut self, text: &str, (x, y): (i32, i32)) {
+        // self.renderer
         let font_set = self.fonts.get_closest_font_set(64).unwrap();
         let font = font_set.get_regular_font();
         let font_outline = font_set.get_outline_font();
         let surface = font.render(text)
-            .blended(Color::RGBA(180, 180, 180, 128)).unwrap();
+                          .blended(Color::RGBA(180, 180, 180, 128))
+                          .unwrap();
         let surface_outline = font_outline.render(text)
-            .blended(Color::RGBA(0, 0, 0, 128)).unwrap();
+                                          .blended(Color::RGBA(0, 0, 0, 128))
+                                          .unwrap();
         let mut texture = self.renderer.create_texture_from_surface(&surface).unwrap();
-        let mut texture_outline = self.renderer.create_texture_from_surface(&surface_outline).unwrap();
+        let mut texture_outline = self.renderer
+                                      .create_texture_from_surface(&surface_outline)
+                                      .unwrap();
         let TextureQuery { width:texture_width, height:texture_height, .. } = texture.query();
-        let TextureQuery { width:texture_outline_width, height:texture_outline_height, .. } = texture_outline.query();
-        self.renderer.copy(&mut texture_outline, None, Some(Rect::new(3,3,texture_outline_width,texture_outline_height)));
-        self.renderer.copy(&mut texture, None, Some(Rect::new(5,5,texture_width,texture_height)));
+        let TextureQuery { width:texture_outline_width, height:texture_outline_height, .. } =
+            texture_outline.query();
+        self.renderer.copy(&mut texture_outline,
+                           None,
+                           Some(Rect::new(x, y, texture_outline_width, texture_outline_height)));
+        self.renderer.copy(&mut texture,
+                           None,
+                           Some(Rect::new(x + 2, y + 2, texture_width, texture_height)));
     }
 
-    pub fn sdl_renderer_mut(&mut self) -> &mut Renderer<'a>{
+    pub fn sdl_renderer_mut(&mut self) -> &mut Renderer<'a> {
         &mut self.renderer
     }
 
-    pub fn sdl_renderer(&self) -> &Renderer<'a>{
+    pub fn sdl_renderer(&self) -> &Renderer<'a> {
         &self.renderer
     }
 }
