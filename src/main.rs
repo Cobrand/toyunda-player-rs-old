@@ -84,14 +84,10 @@ fn main() {
         .unwrap();
 
     let mut renderer = window.renderer().present_vsync().build().unwrap();
-    let _ = renderer.window().unwrap().gl_create_context();
-    renderer.clear();
-    renderer.present();
     let mut displayer = displayer::Displayer::new(renderer).unwrap();
-    /*let font = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
-    let mut font_outline = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
-    font_outline.set_outline_width(2);*/
-
+    let _ = displayer.sdl_renderer().window().unwrap().gl_create_context();
+    displayer.sdl_renderer_mut().clear();
+    displayer.sdl_renderer_mut().present();
 
     let mpv = mpv::Mpv::init().unwrap();
     let mpv_gl = get_mpv_gl(&mpv, &mut video_subsystem);
@@ -100,7 +96,6 @@ fn main() {
     mpv.command(&["loadfile", &args.arg_file as &str]).unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let (mut x,mut y) = (5,5);
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -145,9 +140,7 @@ fn main() {
         let (width, height) = displayer.sdl_renderer().window().unwrap().size();
         //let (width,height) = (960,540) ;
         mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
-        x = x + 1;
-        y = y + 1; 
-        displayer.display("€€€kek",(x,y));
-        displayer.sdl_renderer_mut().window().unwrap().gl_swap_window();
+        displayer.display("€€€kek");
+        displayer.render();
     }
 }

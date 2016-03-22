@@ -156,7 +156,7 @@ impl<'a> Displayer<'a> {
         Ok(displayer)
     }
 
-    pub fn display(&mut self, text: &str, (x, y): (i32, i32)) {
+    pub fn display(&mut self, text: &str) {
         // self.renderer
         let font_set = self.fonts.get_closest_font_set(64).unwrap();
         let font = font_set.get_regular_font();
@@ -176,10 +176,14 @@ impl<'a> Displayer<'a> {
             texture_outline.query();
         self.renderer.copy(&mut texture_outline,
                            None,
-                           Some(Rect::new(x, y, texture_outline_width, texture_outline_height)));
+                           Some(Rect::new(3, 3, texture_outline_width, texture_outline_height)));
         self.renderer.copy(&mut texture,
                            None,
-                           Some(Rect::new(x + 2, y + 2, texture_width, texture_height)));
+                           Some(Rect::new(5, 5, texture_width, texture_height)));
+    }
+
+    pub fn render(&mut self) {
+        self.sdl_renderer_mut().window().unwrap().gl_swap_window();
     }
 
     pub fn sdl_renderer_mut(&mut self) -> &mut Renderer<'a> {
