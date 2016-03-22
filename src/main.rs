@@ -83,7 +83,7 @@ fn main() {
         .build()
         .unwrap();
 
-    let mut renderer = window.renderer().build().unwrap();
+    let mut renderer = window.renderer().present_vsync().build().unwrap();
     let _ = renderer.window().unwrap().gl_create_context();
     renderer.clear();
     renderer.present();
