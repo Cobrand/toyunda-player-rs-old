@@ -19,9 +19,6 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::video::FullscreenType;
 use sdl2_sys::video::SDL_WindowFlags;
-use sdl2::rect::Rect;
-use sdl2::render::TextureQuery;
-use sdl2::pixels::Color;
 
 use std::ffi::CStr;
 use std::os::raw as libc;
@@ -88,17 +85,13 @@ fn main() {
 
     let mut renderer = window.renderer().build().unwrap();
     let _ = renderer.window().unwrap().gl_create_context();
-
+    renderer.clear();
+    renderer.present();
+    let mut displayer = displayer::Displayer::new(renderer).unwrap();
     /*let font = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
     let mut font_outline = ttf_context.load_font(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"), 72).unwrap();
     font_outline.set_outline_width(2);*/
-    renderer.clear();
-    renderer.present();
 
-    let fontlist = displayer::FontList::new(std::path::Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"),&ttf_context).unwrap();
-    let font_set = fontlist.get_closest_font_set(64).unwrap();
-    let font = font_set.get_regular_font();
-    let font_outline = font_set.get_outline_font();
 
     let mpv = mpv::Mpv::init().unwrap();
     let mpv_gl = get_mpv_gl(&mpv, &mut video_subsystem);
@@ -132,11 +125,11 @@ fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Kp1), repeat: false, .. } => {mpv.set_property("speed",0.1).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::Kp0), repeat: false, .. } => {mpv.set_property("speed",1.0).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::F), repeat: false, .. } => {
-                    if (renderer.window().unwrap().window_flags() &
+                    if (displayer.sdl_renderer().window().unwrap().window_flags() &
                         (SDL_WindowFlags::SDL_WINDOW_FULLSCREEN as u32)) != 0 {
-                        renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Off)
+                        displayer.sdl_renderer_mut().window_mut().unwrap().set_fullscreen(FullscreenType::Off)
                     } else {
-                        renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Desktop)
+                        displayer.sdl_renderer_mut().window_mut().unwrap().set_fullscreen(FullscreenType::Desktop)
                     }
                     .unwrap();
                 }
@@ -148,19 +141,11 @@ fn main() {
             // but it's kind of useless
             // it's still necessary to empty the event pool
         }
-        let surface = font.render("1234äoS;HEAd()★?#!{}%ù@")
-            .blended(Color::RGBA(180, 180, 180, 128)).unwrap();
-        let surface_outline = font_outline.render("1234äoS;HEAd()★?#!{}%ù@")
-            .blended(Color::RGBA(0, 0, 0, 128)).unwrap();
-        let mut texture = renderer.create_texture_from_surface(&surface).unwrap();
-        let mut texture_outline = renderer.create_texture_from_surface(&surface_outline).unwrap();
-        let TextureQuery { width:texture_width, height:texture_height, .. } = texture.query();
-        let TextureQuery { width:texture_outline_width, height:texture_outline_height, .. } = texture_outline.query();
 
-        let (width, height) = renderer.window().unwrap().size();
+        //let (width, height) = renderer.window().unwrap().size();
+        let (width,height) = (1280,720) ;
         mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
-        renderer.copy(&mut texture_outline, None, Some(Rect::new(3,3,texture_outline_width,texture_outline_height)));
-        renderer.copy(&mut texture, None, Some(Rect::new(5,5,texture_width,texture_height)));
-        renderer.window().unwrap().gl_swap_window();
+        displayer.display("€€€kek");
+        displayer.sdl_renderer_mut().window().unwrap().gl_swap_window();
     }
 }

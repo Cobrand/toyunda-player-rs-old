@@ -1,6 +1,8 @@
 extern crate sdl2;
 extern crate sdl2_ttf;
-use sdl2::render::Renderer ;
+use sdl2::render::{Renderer,TextureQuery} ;
+use sdl2::rect::Rect;
+use sdl2::pixels::Color;
 use std::vec::Vec;
 use std::cmp::Ordering;
 use std::path::Path;
@@ -138,5 +140,30 @@ impl<'a> Displayer<'a> {
             renderer:renderer
         };
         Ok(displayer)
+    }
+
+    pub fn display(&mut self,text:&str){
+        //self.renderer
+        let font_set = self.fonts.get_closest_font_set(64).unwrap();
+        let font = font_set.get_regular_font();
+        let font_outline = font_set.get_outline_font();
+        let surface = font.render(text)
+            .blended(Color::RGBA(180, 180, 180, 128)).unwrap();
+        let surface_outline = font_outline.render(text)
+            .blended(Color::RGBA(0, 0, 0, 128)).unwrap();
+        let mut texture = self.renderer.create_texture_from_surface(&surface).unwrap();
+        let mut texture_outline = self.renderer.create_texture_from_surface(&surface_outline).unwrap();
+        let TextureQuery { width:texture_width, height:texture_height, .. } = texture.query();
+        let TextureQuery { width:texture_outline_width, height:texture_outline_height, .. } = texture_outline.query();
+        self.renderer.copy(&mut texture_outline, None, Some(Rect::new(3,3,texture_outline_width,texture_outline_height)));
+        self.renderer.copy(&mut texture, None, Some(Rect::new(5,5,texture_width,texture_height)));
+    }
+
+    pub fn sdl_renderer_mut(&mut self) -> &mut Renderer<'a>{
+        &mut self.renderer
+    }
+
+    pub fn sdl_renderer(&self) -> &Renderer<'a>{
+        &self.renderer
     }
 }
