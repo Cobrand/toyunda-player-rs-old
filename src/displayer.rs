@@ -66,7 +66,7 @@ impl FontList {
         let mut result = FontList { fonts: Vec::<FontSet>::new() };
         let mut font_size = 4;
         let font_size_max = 128;
-        let font_size_increment = 4;
+        let font_size_increment = 1;
         let mut error: bool = false;
         'fontlist: while (font_size < font_size_max) {
             let mut font_bold;
@@ -146,7 +146,7 @@ pub struct Displayer<'a> {
 
 impl<'a> Displayer<'a> {
     pub fn new(mut renderer: Renderer<'a>) -> Result<Displayer<'a>, ()> {
-        renderer.set_blend_mode(BlendMode::Blend );
+        renderer.set_blend_mode(BlendMode::Blend);
         let ttf_context = sdl2_ttf::init().unwrap();
         let font_list = FontList::new(Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"),
                                       &ttf_context)
@@ -160,24 +160,26 @@ impl<'a> Displayer<'a> {
     }
 
     pub fn display(&mut self, text: &str) {
-        let font_set = self.fonts.get_closest_font_set(64).unwrap();
+        let size: f32 = 0.04;
+        let window_width = self.renderer.window().unwrap().size().0 as f32;
+        let font_set = self.fonts.get_closest_font_set((size * window_width) as u16).unwrap();
         let font = font_set.get_regular_font();
         let font_outline = font_set.get_outline_font();
         let surface = font.render(text)
                           .blended(Color::RGB(180, 180, 180))
                           .unwrap();
         let mut surface_outline = font_outline.render(text)
-                                          .blended(Color::RGB(0, 0, 0))
-                                          .unwrap();
-        let outline_width : u32 = 2 ;
-        let (width,height) = surface_outline.size() ;
+                                              .blended(Color::RGB(0, 0, 0))
+                                              .unwrap();
+        let outline_width: u32 = 2;
+        let (width, height) = surface_outline.size();
 
-        surface.blit(None,surface_outline.deref_mut(),Some(Rect::new(
-            outline_width as i32,
-            outline_width as i32,
-            (width-outline_width),
-            (height-outline_width)
-        )));
+        surface.blit(None,
+                     surface_outline.deref_mut(),
+                     Some(Rect::new(outline_width as i32,
+                                    outline_width as i32,
+                                    (width - outline_width),
+                                    (height - outline_width))));
         let mut texture = self.renderer.create_texture_from_surface(&surface_outline).unwrap();
         texture.set_blend_mode(BlendMode::Blend);
         texture.set_alpha_mod(128);

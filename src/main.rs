@@ -138,9 +138,9 @@ fn main() {
         }
 
         let (width, height) = displayer.sdl_renderer().window().unwrap().size();
-        //let (width,height) = (960,540) ;
         mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
-        displayer.display("€€€kek");
+        displayer.display("0123456789ABCDEF0123456789abcdef0123456789ABCDEF");
         displayer.render();
     }
+    info!("Exiting software peacefully");
 }
