@@ -56,7 +56,7 @@ impl FontSet {
 }
 
 // MADE PUBLIC FOR TESTS, MAKE PRIVATE WHEN NOT NECESSARY ANYMORE
-pub struct FontList {
+struct FontList {
     // font list is a SORTED font list
     fonts: Vec<FontSet>,
 }
