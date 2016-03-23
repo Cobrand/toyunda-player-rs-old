@@ -1,12 +1,14 @@
 extern crate sdl2;
 extern crate sdl2_ttf;
-use sdl2::render::{Renderer, TextureQuery};
+use sdl2::render::{Renderer, TextureQuery, BlendMode};
 use sdl2::rect::Rect;
 use sdl2::pixels::Color;
 use std::vec::Vec;
 use std::cmp::Ordering;
 use std::path::Path;
 use std::ops::Index;
+
+use std::ops::DerefMut;
 
 pub struct FontSet {
     font_size: u16,
@@ -143,7 +145,8 @@ pub struct Displayer<'a> {
 }
 
 impl<'a> Displayer<'a> {
-    pub fn new(renderer: Renderer<'a>) -> Result<Displayer<'a>, ()> {
+    pub fn new(mut renderer: Renderer<'a>) -> Result<Displayer<'a>, ()> {
+        renderer.set_blend_mode(BlendMode::Blend );
         let ttf_context = sdl2_ttf::init().unwrap();
         let font_list = FontList::new(Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"),
                                       &ttf_context)
@@ -157,29 +160,31 @@ impl<'a> Displayer<'a> {
     }
 
     pub fn display(&mut self, text: &str) {
-        // self.renderer
         let font_set = self.fonts.get_closest_font_set(64).unwrap();
         let font = font_set.get_regular_font();
         let font_outline = font_set.get_outline_font();
         let surface = font.render(text)
-                          .blended(Color::RGBA(180, 180, 180, 128))
+                          .blended(Color::RGB(180, 180, 180))
                           .unwrap();
-        let surface_outline = font_outline.render(text)
-                                          .blended(Color::RGBA(0, 0, 0, 128))
+        let mut surface_outline = font_outline.render(text)
+                                          .blended(Color::RGB(0, 0, 0))
                                           .unwrap();
-        let mut texture = self.renderer.create_texture_from_surface(&surface).unwrap();
-        let mut texture_outline = self.renderer
-                                      .create_texture_from_surface(&surface_outline)
-                                      .unwrap();
+        let outline_width : u32 = 2 ;
+        let (width,height) = surface_outline.size() ;
+
+        surface.blit(None,surface_outline.deref_mut(),Some(Rect::new(
+            outline_width as i32,
+            outline_width as i32,
+            (width-outline_width),
+            (height-outline_width)
+        )));
+        let mut texture = self.renderer.create_texture_from_surface(&surface_outline).unwrap();
+        texture.set_blend_mode(BlendMode::Blend);
+        texture.set_alpha_mod(128);
         let TextureQuery { width:texture_width, height:texture_height, .. } = texture.query();
-        let TextureQuery { width:texture_outline_width, height:texture_outline_height, .. } =
-            texture_outline.query();
-        self.renderer.copy(&mut texture_outline,
-                           None,
-                           Some(Rect::new(3, 3, texture_outline_width, texture_outline_height)));
         self.renderer.copy(&mut texture,
                            None,
-                           Some(Rect::new(5, 5, texture_width, texture_height)));
+                           Some(Rect::new(3, 3, texture_width, texture_height)));
     }
 
     pub fn render(&mut self) {
