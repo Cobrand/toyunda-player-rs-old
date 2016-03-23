@@ -8,6 +8,7 @@ extern crate num;
 extern crate gl;
 extern crate sdl2;
 extern crate sdl2_sys;
+extern crate sdl2_ttf;
 
 #[macro_use]
 extern crate log;
@@ -22,6 +23,8 @@ use sdl2_sys::video::SDL_WindowFlags;
 use std::ffi::CStr;
 use std::os::raw as libc;
 use std::ops::Deref;
+
+mod displayer ;
 
 
 mod mpv;
@@ -67,22 +70,24 @@ fn main() {
         .unwrap_or_else(|e| e.exit());
 
     let sdl_context = sdl2::init().unwrap();
+
     let mut video_subsystem = sdl_context.video().unwrap();
     video_subsystem.gl_load_library_default().unwrap();
 
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
-    let window = video_subsystem.window("Toyunda Player", 800, 600)
+    let window = video_subsystem.window("Toyunda Player", 960, 540)
         .resizable()
         .position_centered()
         .opengl()
         .build()
         .unwrap();
 
-    let mut renderer = window.renderer().build().unwrap();
-    let _ = renderer.window().unwrap().gl_create_context();
-    renderer.clear();
-    renderer.present();
+    let mut renderer = window.renderer().present_vsync().build().unwrap();
+    let mut displayer = displayer::Displayer::new(renderer).unwrap();
+    let _ = displayer.sdl_renderer().window().unwrap().gl_create_context();
+    displayer.sdl_renderer_mut().clear();
+    displayer.sdl_renderer_mut().present();
 
     let mpv = mpv::Mpv::init().unwrap();
     let mpv_gl = get_mpv_gl(&mpv, &mut video_subsystem);
@@ -91,7 +96,6 @@ fn main() {
     mpv.command(&["loadfile", &args.arg_file as &str]).unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
-
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -116,11 +120,11 @@ fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Kp1), repeat: false, .. } => {mpv.set_property("speed",0.1).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::Kp0), repeat: false, .. } => {mpv.set_property("speed",1.0).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::F), repeat: false, .. } => {
-                    if (renderer.window().unwrap().window_flags() &
+                    if (displayer.sdl_renderer().window().unwrap().window_flags() &
                         (SDL_WindowFlags::SDL_WINDOW_FULLSCREEN as u32)) != 0 {
-                        renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Off)
+                        displayer.sdl_renderer_mut().window_mut().unwrap().set_fullscreen(FullscreenType::Off)
                     } else {
-                        renderer.window_mut().unwrap().set_fullscreen(FullscreenType::Desktop)
+                        displayer.sdl_renderer_mut().window_mut().unwrap().set_fullscreen(FullscreenType::Desktop)
                     }
                     .unwrap();
                 }
@@ -132,8 +136,11 @@ fn main() {
             // but it's kind of useless
             // it's still necessary to empty the event pool
         }
-        let (width, height) = renderer.window().unwrap().size();
+
+        let (width, height) = displayer.sdl_renderer().window().unwrap().size();
         mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
-        renderer.window().unwrap().gl_swap_window();
+        displayer.display("0123456789ABCDEF0123456789abcdef0123456789ABCDEF");
+        displayer.render();
     }
+    info!("Exiting software peacefully");
 }
