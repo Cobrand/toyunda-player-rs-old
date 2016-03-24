@@ -120,6 +120,7 @@ fn main() {
         };
         let (width, height) = display.get_window().unwrap().get_inner_size_pixels().unwrap();
         mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
+        println!("{}",display.get_window().unwrap().is_current());
         let mut target = display.draw();
         while let Some(_) = mpv.wait_event() {
             // do something with the events
