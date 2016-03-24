@@ -49,3 +49,12 @@ You then have to link these 3 libs with your executable whenever you want to sha
 ### Mac
 
 No.
+
+## Licence
+
+toyunda-player is licensing under the zlib/libpng licence (basically you can do anything but not misrepresent who created this).
+
+toyunda-player also uses :
+
+* libmpv (under the GPLv2 licence)
+* SDL2 (under the zlib/libpng licence)
