@@ -118,6 +118,8 @@ fn main() {
                 _ => {}
             }
         };
+        let (width, height) = display.get_window().unwrap().get_inner_size_pixels().unwrap();
+        mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
         let mut target = display.draw();
         // for event in event_pump.poll_iter() {
         //     match event {
@@ -159,11 +161,9 @@ fn main() {
             // it's still necessary to empty the event pool
         }
 
-        let (width, height) = target.get_dimensions();
 
-        mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
-        /*target.draw(&vertex_buffer, &indices, &program, &glium::uniforms::EmptyUniforms,
-                    &Default::default()).unwrap();*/
+        target.draw(&vertex_buffer, &indices, &program, &glium::uniforms::EmptyUniforms,
+                    &Default::default()).unwrap();
         target.finish().unwrap();
     }
 }
