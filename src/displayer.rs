@@ -148,7 +148,7 @@ impl<'a> Displayer<'a> {
     pub fn new(mut renderer: Renderer<'a>) -> Result<Displayer<'a>, ()> {
         renderer.set_blend_mode(BlendMode::Blend);
         let ttf_context = sdl2_ttf::init().unwrap();
-        let font_list = FontList::new(Path::new("/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf"),
+        let font_list = FontList::new(Path::new("./res/DejaVuSansMono-Bold.ttf"),
                                       &ttf_context)
                             .unwrap();
         let displayer = Displayer {

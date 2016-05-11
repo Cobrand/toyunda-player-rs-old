@@ -73,9 +73,6 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
 
     let mut video_subsystem = sdl_context.video().unwrap();
-    video_subsystem.gl_load_library_default().unwrap();
-
-    gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
     let window = video_subsystem.window("Toyunda Player", 960, 540)
         .resizable()
@@ -85,9 +82,9 @@ fn main() {
         .unwrap();
     let mut opengl_driver : Option<i32> = None ;
     info!("Detecting drivers ...");
-    let driver_index = -1 ;
+    let mut driver_index = -1 ;
     for item in sdl2::render::drivers() {
-        let driver_index = driver_index + 1 ;
+        driver_index = driver_index + 1 ;
         info!("* '{}'",item.name);
         if (item.name == "opengl"){
             info!("Found opengl driver !");
@@ -97,9 +94,7 @@ fn main() {
     info!("End of driver detection");
     let mut renderer = window.renderer().present_vsync().index(opengl_driver.unwrap() as u32).build().unwrap();
     let mut displayer = displayer::Displayer::new(renderer).unwrap();
-    let context = displayer.sdl_renderer().window().unwrap().gl_create_context();
-    displayer.sdl_renderer_mut().clear();
-    displayer.sdl_renderer_mut().present();
+    displayer.sdl_renderer().window().unwrap().gl_set_context_to_current();
 
     let mpv = mpv::Mpv::init().unwrap();
     let mpv_gl = get_mpv_gl(&mpv, &mut video_subsystem);
