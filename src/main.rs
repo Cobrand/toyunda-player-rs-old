@@ -91,18 +91,26 @@ fn main() {
             opengl_driver = Some(driver_index);
         }
     }
-    info!("End of driver detection");
-    let mut renderer = window.renderer().present_vsync().index(opengl_driver.unwrap() as u32).build().unwrap();
-    let mut displayer = displayer::Displayer::new(renderer).unwrap();
-    displayer.sdl_renderer().window().unwrap().gl_set_context_to_current();
+    debug!("End of driver detection");
+    let opengl_driver = opengl_driver.expect("No opengl driver found, aborting") as u32 ;
+    let mut renderer = window.renderer()
+        .present_vsync()
+        .index(opengl_driver)
+        .build()
+        .expect("Failed to create renderer with given parameters");
+    let mut displayer = displayer::Displayer::new(renderer).expect("Failed to create displayer");
+    displayer.sdl_renderer()
+        .window()
+        .expect("Failed to extract window from displayer")
+        .gl_set_context_to_current();
 
-    let mpv = mpv::Mpv::init().unwrap();
+    let mpv = mpv::Mpv::init().expect("Error while initializing MPV");
     let mpv_gl = get_mpv_gl(&mpv, &mut video_subsystem);
-    mpv.set_option("vo", "opengl-cb").unwrap();
-    mpv.set_option("sid", "no").unwrap();
-    mpv.command(&["loadfile", &args.arg_file as &str]).unwrap();
+    mpv.set_option("vo", "opengl-cb").expect("Error setting vo option to opengl-cb");
+    mpv.set_option("sid", "no").expect("Error setting custom option sid to false");
+    mpv.command(&["loadfile", &args.arg_file as &str]).expect("Error loading file");
 
-    let mut event_pump = sdl_context.event_pump().unwrap();
+    let mut event_pump = sdl_context.event_pump().expect("Failed to create event_pump");
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -111,8 +119,8 @@ fn main() {
                 },
                 Event::KeyDown { keycode: Some(Keycode::Space),repeat: false, .. } => {
                     match mpv.get_property_string("pause") {
-                        "yes" => {mpv.set_property("pause","no").unwrap();},
-                        "no" => {mpv.set_property("pause","yes").unwrap();},
+                        "yes" => {mpv.set_property("pause","no").expect("Failed to pause player");},
+                        "no" => {mpv.set_property("pause","yes").expect("Failed to unpause player");},
                         _ => {panic!("unexpected answer from get_property_string");}
                     }
                 },
@@ -133,7 +141,7 @@ fn main() {
                     } else {
                         displayer.sdl_renderer_mut().window_mut().unwrap().set_fullscreen(FullscreenType::Desktop)
                     }
-                    .unwrap();
+                    .expect("Failed to change fullscreen parameter of mpv");
                 }
                 _ => {}
             }
