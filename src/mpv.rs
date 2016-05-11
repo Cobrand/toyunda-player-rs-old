@@ -15,7 +15,7 @@ pub type Result<T> = result::Result<T, mpv_error>;
 
 impl Error for Enum_mpv_error {
     fn description(&self) -> &str {
-        let str_ptr = unsafe {mpv_error_string(*self as libc::c_int)};
+        let str_ptr = unsafe { mpv_error_string(*self as libc::c_int) };
         assert!(!str_ptr.is_null());
         unsafe { ffi::CStr::from_ptr(str_ptr).to_str().unwrap() }
     }
@@ -92,6 +92,11 @@ impl Mpv {
                             get_proc_address,
                             get_proc_address_ctx)
     }
+    // pub fn get_event_name(event: Enum_mpv_event_id) -> &str {
+    // ffi::CStr::from_ptr(mpv_event_name(Enum_mpv_event_id))
+    // .to_str()
+    // .unwrap()
+    // }
 
     pub fn command(&self, command: &[&str]) -> Result<()> {
         let command_cstring: Vec<_> = command.iter()
@@ -134,6 +139,31 @@ impl Mpv {
                 mpv_set_property_string(self.handle,
                                         ffi::CString::new(property).unwrap().as_ptr(),
                                         ffi::CString::new(string).unwrap().as_ptr())
+            },
+        };
+        ret_to_result(ret, ())
+    }
+
+    pub fn set_property_async<T: MpvFormatProperty>(&self,
+                                                    property: &str,
+                                                    mut value: T)
+                                                    -> Result<()> {
+        let format_struct: MpvFormat = value.to_mpv_format();
+        let ret = match format_struct {
+            MpvFormat::RawMpvFormat { format, data: ptr } => unsafe {
+                mpv_set_property_async(self.handle,
+                                       1,
+                                       ffi::CString::new(property).unwrap().as_ptr(),
+                                       format,
+                                       ptr)
+            },
+            MpvFormat::Str(string) => unsafe {
+                let tmp_str = ffi::CString::new(string).unwrap().as_ptr();
+                mpv_set_property_async(self.handle,
+                                       1,
+                                       ffi::CString::new(property).unwrap().as_ptr(),
+                                       Enum_mpv_format::MPV_FORMAT_STRING,
+                                       tmp_str as *mut libc::c_void)
             },
         };
         ret_to_result(ret, ())

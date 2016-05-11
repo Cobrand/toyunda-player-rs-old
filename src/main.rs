@@ -16,6 +16,8 @@ extern crate env_logger;
 
 use gl::types::* ;
 
+use std::time;
+
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::video::FullscreenType;
@@ -118,23 +120,26 @@ fn main() {
                     break 'running
                 },
                 Event::KeyDown { keycode: Some(Keycode::Space),repeat: false, .. } => {
+                    let instant = time::Instant::now() ;
                     match mpv.get_property_string("pause") {
                         "yes" => {mpv.set_property("pause","no").expect("Failed to pause player");},
                         "no" => {mpv.set_property("pause","yes").expect("Failed to unpause player");},
                         _ => {panic!("unexpected answer from get_property_string");}
                     }
+                    println!("Duration of pause / unpause : {},{}",instant.elapsed().as_secs(),instant.elapsed().subsec_nanos());
                 },
-                Event::KeyDown { keycode: Some(Keycode::Kp9), repeat: false, .. } => {mpv.set_property("speed",0.9).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp8), repeat: false, .. } => {mpv.set_property("speed",0.8).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp7), repeat: false, .. } => {mpv.set_property("speed",0.7).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp6), repeat: false, .. } => {mpv.set_property("speed",0.6).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp5), repeat: false, .. } => {mpv.set_property("speed",0.5).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp4), repeat: false, .. } => {mpv.set_property("speed",0.4).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp3), repeat: false, .. } => {mpv.set_property("speed",0.3).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp2), repeat: false, .. } => {mpv.set_property("speed",0.2).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp1), repeat: false, .. } => {mpv.set_property("speed",0.1).unwrap();},
-                Event::KeyDown { keycode: Some(Keycode::Kp0), repeat: false, .. } => {mpv.set_property("speed",1.0).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp9), repeat: false, .. } => {mpv.set_property_async("speed",0.9).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp8), repeat: false, .. } => {mpv.set_property_async("speed",0.8).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp7), repeat: false, .. } => {mpv.set_property_async("speed",0.7).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp6), repeat: false, .. } => {mpv.set_property_async("speed",0.6).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp5), repeat: false, .. } => {mpv.set_property_async("speed",0.5).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp4), repeat: false, .. } => {mpv.set_property_async("speed",0.4).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp3), repeat: false, .. } => {mpv.set_property_async("speed",0.3).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp2), repeat: false, .. } => {mpv.set_property_async("speed",0.2).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp1), repeat: false, .. } => {mpv.set_property_async("speed",0.1).unwrap();},
+                Event::KeyDown { keycode: Some(Keycode::Kp0), repeat: false, .. } => {mpv.set_property_async("speed",1.0).unwrap();},
                 Event::KeyDown { keycode: Some(Keycode::F), repeat: false, .. } => {
+                    let instant = time::Instant::now() ;
                     if (displayer.sdl_renderer().window().unwrap().window_flags() &
                         (SDL_WindowFlags::SDL_WINDOW_FULLSCREEN as u32)) != 0 {
                         displayer.sdl_renderer_mut().window_mut().unwrap().set_fullscreen(FullscreenType::Off)
@@ -142,6 +147,7 @@ fn main() {
                         displayer.sdl_renderer_mut().window_mut().unwrap().set_fullscreen(FullscreenType::Desktop)
                     }
                     .expect("Failed to change fullscreen parameter of mpv");
+                    println!("Duration of fullscreen : {},{}",instant.elapsed().as_secs(),instant.elapsed().subsec_nanos());
                 }
                 _ => {}
             }
@@ -153,7 +159,7 @@ fn main() {
         }
 
         let (width, height) = displayer.sdl_renderer().window().unwrap().size();
-        mpv_gl.draw(0, width as i32, -(height as i32)).unwrap();
+        mpv_gl.draw(0, width as i32, -(height as i32)).expect("Failed to draw ");
         displayer.display("0123456789ABCDEF0123456789abcdef0123456789ABCDEF");
         displayer.render();
     }
