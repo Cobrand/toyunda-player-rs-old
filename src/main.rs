@@ -14,6 +14,7 @@ extern crate sdl2_ttf;
 extern crate log;
 extern crate env_logger;
 
+use gl::types::* ;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -82,10 +83,21 @@ fn main() {
         .opengl()
         .build()
         .unwrap();
-
-    let mut renderer = window.renderer().present_vsync().build().unwrap();
+    let mut opengl_driver : Option<i32> = None ;
+    info!("Detecting drivers ...");
+    let driver_index = -1 ;
+    for item in sdl2::render::drivers() {
+        let driver_index = driver_index + 1 ;
+        info!("* '{}'",item.name);
+        if (item.name == "opengl"){
+            info!("Found opengl driver !");
+            opengl_driver = Some(driver_index);
+        }
+    }
+    info!("End of driver detection");
+    let mut renderer = window.renderer().present_vsync().index(opengl_driver.unwrap() as u32).build().unwrap();
     let mut displayer = displayer::Displayer::new(renderer).unwrap();
-    let _ = displayer.sdl_renderer().window().unwrap().gl_create_context();
+    let context = displayer.sdl_renderer().window().unwrap().gl_create_context();
     displayer.sdl_renderer_mut().clear();
     displayer.sdl_renderer_mut().present();
 
