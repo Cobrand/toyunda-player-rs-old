@@ -93,42 +93,6 @@ mod subtitle {
 
     impl Sub {
         /**
-         * Return the next "state" of the frame and the position of the current "pointed"
-         * character at the frame frame_nb
-         *
-         * Can't go backward (do nothing if frame_nb is back in time)
-         */
-        pub fn advance(&mut self, frame_nb: usize) -> (Position, /*&*/Pair<Sentence>) {
-            // TODO, FIXME : check that sub is advance of the right number of frame
-            // TODO : bound check ???
-            let mut current = &self.sentences[self.current_frame];
-            let next = &self.sentences[self.current_frame+1];
-
-            // Check if we are still in the same sentence
-            if frame_nb >= current.frame {
-                // we are on the next sentence
-
-                // Check if we are between current and next
-                if frame_nb >= next.frame {
-                    // we are after the next sentence
-                    self.current_frame +=1;
-                    current = &self.sentences[self.current_frame];
-                };
-
-                // FIXME : tmp = current avant l'update de self.current_frame
-                //                      -> comportement voulu ?
-                let mut tmp = current.value.clone().advance(frame_nb);
-                // FIXME : devrait renvoyer une ref sur un Sub.sentences[idx] ???
-                (tmp.current_pos(), Pair{frame: current.frame, value: tmp})
-            } else {
-                // we are before the current sentence
-                self.current_frame += 1;
-                let current_sentence = self.sentences[self.current_frame].clone();
-                ( current_sentence.value.syllables[current_sentence.value.last_colored].value.pos , current_sentence )
-            }
-        }
-
-        /**
          * Advance the Sub to the frame frame_dest, can't go back
          */
         pub fn advance_to(&mut self, frame_dest: usize) {
